@@ -39,7 +39,6 @@ export async function GET() {
       status: operator.status,
       role: operator.role,
       processesCount: operator._count.processes,
-      maxProcesses: operator.maxProcesses || 10 // valor padrão caso não esteja definido
     }))
 
     return NextResponse.json(formattedOperators)
