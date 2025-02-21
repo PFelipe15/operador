@@ -55,7 +55,7 @@ export function MetricCard({ title, value, icon: Icon, color }: MetricCardProps)
   const colors = colorVariants[color]
   
   return (
-    <Card className="border shadow-sm hover:shadow-md transition-all">
+    <Card className="border shadow-sm hover:shadow-md transition-all dark:bg-gray-900 ">
       <div className="p-6">
         <div className="flex items-center gap-4">
           <div className={`p-3 rounded-lg ${colors.bg} ${colors.text}`}>

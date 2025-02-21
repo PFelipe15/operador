@@ -275,7 +275,7 @@ export default function DashboardPage() {
     <div className="min-h-screen ">
       <div className="max-w-[1600px] mx-auto  space-y-6">
         {/* Header */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm">
+        <div className="bg-white  rounded-xl p-6 shadow-sm">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Dashboard</h1>
@@ -455,10 +455,10 @@ export default function DashboardPage() {
 
   else{
     return(
-      <div className="min-h-screen bg-gradient-to-br   dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen bg-gradient-to-br  ">
         <div className="max-w-[1600px] mx-auto  space-y-6">
           {/* Header */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Painel Administrativo</h1>
@@ -507,7 +507,7 @@ export default function DashboardPage() {
 
           {/* Gráficos Principais */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="shadow-sm hover:shadow-md transition-all">
+            <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900 ">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -545,7 +545,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm hover:shadow-md transition-all">
+            <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900 ">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -585,7 +585,7 @@ export default function DashboardPage() {
 
           {/* Métricas de Eficiência */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="shadow-sm hover:shadow-md transition-all">
+            <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900  ">
               <CardContent className="p-6">
                 <div className="flex flex-col gap-2">
                   <span className="text-sm font-medium text-gray-500">Tempo Médio de Conclusão</span>
@@ -599,7 +599,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm hover:shadow-md transition-all">
+            <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900 ">
               <CardContent className="p-6">
                 <div className="flex flex-col gap-2">
                   <span className="text-sm font-medium text-gray-500">Taxa de Verificação</span>
@@ -612,7 +612,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm hover:shadow-md transition-all">
+            <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900 ">
               <CardContent className="p-6">
                 <div className="flex flex-col gap-2">
                   <span className="text-sm font-medium text-gray-500">Processos por Operador</span>
