@@ -11,8 +11,18 @@ export async function GET() {
         name: true,
         email: true,
         status: true,
-        processesCount: true,
-        role: true
+        role: true,
+        _count: {
+          select: {
+            processes: {
+              where: {
+                status: {
+                  not: 'COMPLETED'
+                }
+              }
+            }
+          }
+        },
       },
       where: {
         status: {
@@ -21,7 +31,18 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json(operators)
+    // Formatar a resposta para incluir processesCount
+    const formattedOperators = operators.map(operator => ({
+      id: operator.id,
+      name: operator.name,
+      email: operator.email,
+      status: operator.status,
+      role: operator.role,
+      processesCount: operator._count.processes,
+      maxProcesses: operator.maxProcesses || 10 // valor padrão caso não esteja definido
+    }))
+
+    return NextResponse.json(formattedOperators)
   } catch (error) {
     console.error('Erro ao buscar operadores:', error)
     return NextResponse.json(
@@ -62,6 +83,7 @@ export async function POST(request: Request) {
         })
       }
     })
+
 
     return NextResponse.json(operator)
   } catch (error) {
