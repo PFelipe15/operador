@@ -4,11 +4,17 @@ import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import "@/app/globals.css";
 import { Toaster } from "sonner";
+import { Metadata } from "next";
 
 const inter = Inter({ subsets: ["latin"] });
 
 interface LayoutProps {
   children: ReactNode;
+}
+
+export const metadata: Metadata = {
+  title: "STEP.MEI",
+  description: "Sistema de gestão de abertura de MEI",
 }
 
 const RootLayout: FC<LayoutProps> = ({ children }) => {
