@@ -125,11 +125,14 @@ ChartJS.register(
 
 export default function DashboardPage() {
   const { operator } = useAuth()
-  const [stats, setStats] = useState<DashboardStatsOperator  | null>(null)
+  const [stats, setStats] = useState<DashboardStatsOperator | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   const isAdmin = operator?.role === 'ADMIN'
+
   useEffect(() => {
+    let isMounted = true // Controle de montagem do componente
+
     const fetchStats = async () => {
       if (!operator?.id) return
       
@@ -140,15 +143,23 @@ export default function DashboardPage() {
         
         if (!response.ok) throw new Error(data.error)
         
-        setStats(data)
+        if (isMounted) { // Verifica se o componente ainda está montado
+          setStats(data)
+        }
       } catch (error) {
         console.error('Erro ao carregar estatísticas:', error)
       } finally {
-        setIsLoading(false)
+        if (isMounted) {
+          setIsLoading(false)
+        }
       }
     }
 
     fetchStats()
+
+    return () => {
+      isMounted = false // Limpeza ao desmontar
+    }
   }, [operator?.id])
 
   if (isLoading) {
@@ -604,9 +615,9 @@ export default function DashboardPage() {
                 <div className="flex flex-col gap-2">
                   <span className="text-sm font-medium text-gray-500">Taxa de Verificação</span>
                   <div className="flex items-end gap-2">
-                    <span className="text-3xl font-bold text-gray-800">{stats.documentVerificationRate.toFixed(1)}%</span>
+                    <span className="text-3xl font-bold text-gray-800">{stats?.documentVerificationRate?.toFixed(1)}%</span>
                   </div>
-                  <Progress value={stats.documentVerificationRate} className="h-2" />
+                  <Progress value={stats?.documentVerificationRate} className="h-2" />
                   <span className="text-sm text-gray-500">Meta: 95%</span>
                 </div>
               </CardContent>
