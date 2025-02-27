@@ -1,4 +1,4 @@
-import { ProcessStatus } from "@prisma/client"
+import { PendingDataType, ProcessStatus } from "@prisma/client"
 import { Building2, CheckCircle2, FileText, User2 } from "lucide-react"
 import { Icon } from "next/dist/lib/metadata/types/metadata-types"
 
@@ -9,34 +9,39 @@ export const MEI_ANALYSIS_STEPS = {
     title: "Análise de Dados Pessoais",
     description: "Verificação dos dados cadastrais do cliente",
     icon: User2,
-    status: "PENDING_DATA",
-    next_status: "PENDING_COMPANY",
+    status: "ANALYZING_DATA",
+    next_status: "ANALYZING_COMPANY",
     progress: 20,
     checkItems: [
       {
         id: "nome_completo",
         label: "Nome completo está correto e sem abreviações",
-        required: true
+        required: true,
+        pendingTypeData: [ PendingDataType.DATA_NOME_COMPLETO]
       },
       {
         id: "cpf_valido",
         label: "CPF válido e consistente com documentação",
-        required: true
+        required: true,
+        pendingTypeData: [PendingDataType.DATA_CPF]
       },
       {
         id: "rg_valido",
         label: "RG válido e dentro da validade",
-        required: true
+        required: true,
+        pendingTypeData: [PendingDataType.DATA_RG]
       },
       {
         id: "endereco_completo",
         label: "Endereço completo e com comprovante",
-        required: true
+        required: true,
+        pendingTypeData: [PendingDataType.DATA_ENDERECO]
       },
       {
         id: "contatos_validos",
         label: "Telefone e email válidos e testados",
-        required: true
+        required: true,
+        pendingTypeData: [PendingDataType.DATA_TELEFONE, PendingDataType.DATA_EMAIL]
       }
     ]
   },
@@ -46,8 +51,8 @@ export const MEI_ANALYSIS_STEPS = {
     title: "Análise de Atividade MEI",
     description: "Verificação da atividade pretendida",
     icon: Building2,
-    status: "PENDING_COMPANY",
-    next_status: "PENDING_DOCS",
+    status: "ANALYZING_COMPANY",
+    next_status: "ANALYZING_DOCS",
     progress: 40,
     checkItems: [
       {
@@ -58,17 +63,14 @@ export const MEI_ANALYSIS_STEPS = {
       {
         id: "atividade_principal",
         label: "Atividade principal claramente definida",
-        required: true
+        required: true,
+        pendingTypeData: [PendingDataType.COMPANY_PRINCIPAL_ACTIVITY]
       },
       {
-        id: "limite_faturamento",
-        label: "Previsão de faturamento dentro do limite MEI",
-        required: true
-      },
-      {
-        id: "restricoes_atividade",
-        label: "Sem restrições para a atividade escolhida",
-        required: true
+        id: "nome_fantasia",
+        label: "Nome fantasia válido e registrado",
+        required: true,
+        pendingTypeData: [PendingDataType.COMPANY_NAME]
       }
     ]
   },
@@ -83,24 +85,22 @@ export const MEI_ANALYSIS_STEPS = {
     progress: 60,
     checkItems: [
       {
-        id: "docs_pessoais",
+        id: "docs_pessoais_rg",
         label: "Documentos pessoais completos e legíveis",
-        required: true
+        required: true,
+        pendingTypeData: [PendingDataType.DOC_IDENTIDADE, PendingDataType.DOC_RESIDENCIA, PendingDataType.DOC_COMPROVANTE_ENDERECO, PendingDataType.DOC_COMPROVANTE_EMPRESA, PendingDataType.DOC_COMPROVANTE_RENDA]
       },
       {
-        id: "comp_residencia",
-        label: "Comprovante de residência válido e recente",
-        required: true
+        id: "docs_pessoais_cpf",
+        label: "CPF válido e consistente com documentação",
+        required: true,
+        pendingTypeData: [PendingDataType.DOC_CPF]
       },
-      {
-        id: "declaracao_mei",
-        label: "Declaração de enquadramento MEI assinada",
-        required: true
-      },
+     
       {
         id: "certidoes_negativas",
         label: "Certidões negativas verificadas",
-        required: true
+        required: false
       }
     ]
   },
@@ -176,6 +176,7 @@ export interface CheckItem {
   label: string
   required: boolean
   checked?: boolean
+  pendingTypeData?: PendingDataType[]
 }
 
 // Tipo para os steps de análise

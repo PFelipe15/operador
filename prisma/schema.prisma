@@ -7,91 +7,94 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 enum ProcessStatus {
   // Status Inicial
-  CREATED         @map("CREATED")          // Processo Criado
-  
-  // Status de Dados
-  PENDING_DATA    @map("PENDING_DATA")     // Pendente de Dados Pessoais
-  PENDING_COMPANY @map("PENDING_COMPANY")  // Pendente de Dados da Empresa
-  PENDING_DOCS    @map("PENDING_DOCS")     // Pendente de Documentos
-  
+  CREATED @map("CREATED") // Processo Criado
+
+  // Status de Dados Pendentes
+  PENDING_DATA    @map("PENDING_DATA") // Pendente de Dados Pessoais
+  PENDING_COMPANY @map("PENDING_COMPANY") // Pendente de Dados da Empresa
+  PENDING_DOCS    @map("PENDING_DOCS") // Pendente de Documentos
+
+  // Analise de dados (status usados na analise do processo)
+  ANALYZING_DATA    @map("ANALYZING_DATA") // Análise de Dados
+  ANALYZING_COMPANY @map("ANALYZING_COMPANY") // Análise de Empresa
+  ANALYZING_DOCS    @map("ANALYZING_DOCS") // Análise de Documentos
+
   // Status de Análise
-  DOCS_SENT       @map("DOCS_SENT")        // Documentos Enviados
-  IN_ANALYSIS     @map("IN_ANALYSIS")      // Em Análise de Documentos
-  CREDIT_REVIEW   @map("CREDIT_REVIEW")    // Em Análise de Crédito
-  UNDER_REVIEW    @map("UNDER_REVIEW")     // Em Revisão Final
-  
+  DOCS_SENT     @map("DOCS_SENT") // Documentos Enviados
+  IN_ANALYSIS   @map("IN_ANALYSIS") // Em Análise de Documentos
+  CREDIT_REVIEW @map("CREDIT_REVIEW") // Em Análise de Crédito
+  UNDER_REVIEW  @map("UNDER_REVIEW") // Em Revisão Final
+
   // Status de Conclusão
-  APPROVED        @map("APPROVED")         // Aprovado
-  COMPLETED       @map("COMPLETED")        // Finalizado
-  
+  APPROVED  @map("APPROVED") // Aprovado
+  COMPLETED @map("COMPLETED") // Finalizado
+
   // Status Especiais
-  ON_HOLD         @map("ON_HOLD")          // Em Espera
-  CANCELLED       @map("CANCELLED")        // Cancelado
-  REJECTED        @map("REJECTED")         // Rejeitado
+  ON_HOLD   @map("ON_HOLD") // Em Espera
+  CANCELLED @map("CANCELLED") // Cancelado
+  REJECTED  @map("REJECTED") // Rejeitado
 }
 
 enum ProcessPriority {
-  HIGH    @map("HIGH")
-  MEDIUM  @map("MEDIUM")
-  LOW     @map("LOW")
+  HIGH   @map("HIGH")
+  MEDIUM @map("MEDIUM")
+  LOW    @map("LOW")
 }
 
 enum ProcessType {
-  ABERTURA_MEI    @map("ABERTURA_MEI")
-  ALTERACAO_MEI     @map("ALTERACAO_MEI")
+  ABERTURA_MEI  @map("ABERTURA_MEI")
+  ALTERACAO_MEI @map("ALTERACAO_MEI")
   BAIXA_MEI     @map("BAIXA_MEI")
- }
-
+}
 
 enum DocumentStatus {
-  PENDING   @map("PENDING")
-  SENT      @map("SENT")
-  VERIFIED  @map("VERIFIED")
-  REJECTED  @map("REJECTED")
+  PENDING  @map("PENDING")
+  SENT     @map("SENT")
+  VERIFIED @map("VERIFIED")
+  REJECTED @map("REJECTED")
 }
 
 enum TimelineEventType {
-  SUCCESS  @map("SUCCESS")
-  WARNING  @map("WARNING")
-  ERROR    @map("ERROR")
-  INFO     @map("INFO")
+  SUCCESS @map("SUCCESS")
+  WARNING @map("WARNING")
+  ERROR   @map("ERROR")
+  INFO    @map("INFO")
 }
 
 enum TimelineEventCategory {
-  STATUS    @map("STATUS")
-  DOCUMENT  @map("DOCUMENT")
-  DATA      @map("DATA")
-  ANALYSIS  @map("ANALYSIS")
+  STATUS   @map("STATUS")
+  DOCUMENT @map("DOCUMENT")
+  DATA     @map("DATA")
+  ANALYSIS @map("ANALYSIS")
 }
 
 enum NotificationType {
-  ALERT     @map("ALERT")
-  INFO      @map("INFO")
-  WARNING   @map("WARNING")
-  SUCCESS   @map("SUCCESS")
+  ALERT   @map("ALERT")
+  INFO    @map("INFO")
+  WARNING @map("WARNING")
+  SUCCESS @map("SUCCESS")
 }
 
 enum NotificationCategory {
-  PROCESS   @map("PROCESS")
-  DOCUMENT  @map("DOCUMENT")
-  SYSTEM    @map("SYSTEM")
-  ANALYSIS  @map("ANALYSIS")
+  PROCESS  @map("PROCESS")
+  DOCUMENT @map("DOCUMENT")
+  SYSTEM   @map("SYSTEM")
+  ANALYSIS @map("ANALYSIS")
 }
 
 enum NotificationPriority {
-  HIGH     @map("HIGH")
-  NORMAL   @map("NORMAL")
-  LOW      @map("LOW")
+  HIGH   @map("HIGH")
+  NORMAL @map("NORMAL")
+  LOW    @map("LOW")
 }
 
 enum NotificationStatus {
-  PENDING   @map("PENDING")
-  SENT      @map("SENT")
-  VIEWED    @map("VIEWED")
-  FAILED    @map("FAILED")
+  PENDING @map("PENDING")
+  SENT    @map("SENT")
+  VIEWED  @map("VIEWED")
+  FAILED  @map("FAILED")
 }
 
 enum Source {
@@ -101,59 +104,77 @@ enum Source {
   PLATFORM @map("PLATFORM")
 }
 
+enum PendingDataType {
+  DATA_NOME_COMPLETO         @map("NOME_COMPLETO")
+  DATA_CPF                   @map("CPF")
+  DATA_RG                    @map("RG")
+  DATA_ENDERECO              @map("ENDERECO")
+  DATA_TELEFONE              @map("TELEFONE")
+  DATA_EMAIL                 @map("EMAIL")
+  DATA_NASCIMENTO            @map("DATA_NASCIMENTO")
+  DATA_NOME_MAE              @map("NOME_MAE")
+  DOC_IDENTIDADE             @map("DOC_IDENTIDADE")
+  DOC_RESIDENCIA             @map("DOC_RESIDENCIA")
+  DOC_COMPROVANTE_ENDERECO   @map("DOC_COMPROVANTE_ENDERECO")
+  DOC_COMPROVANTE_EMPRESA    @map("DOC_COMPROVANTE_EMPRESA")
+  DOC_COMPROVANTE_RENDA      @map("DOC_COMPROVANTE_RENDA")
+  DOC_CPF                   @map("DOC_CPF")
+  COMPANY_NAME               @map("COMPANY_NAME")
+  COMPANY_PRINCIPAL_ACTIVITY @map("COMPANY_PRINCIPAL_ACTIVITY")
+}
 
 model Client {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String
-  cpf       String   @unique
-  email     String   @unique
-  phone     String
-  birthDate DateTime?
-  rg        String?
-  motherName String?
-  address   Address?
-  source    Source   @default(MANUAL)
-  status    String   @default("ACTIVE")
-  processes Process[]
+  id               String    @id @default(cuid())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  name             String
+  cpf              String    @unique
+  email            String    @unique
+  phone            String
+  birthDate        DateTime?
+  rg               String?
+  motherName       String?
+  address          Address?
+  source           Source    @default(MANUAL)
+  status           String    @default("ACTIVE")
+  processes        Process[]
   preferredContact String?
-  notifications    Boolean @default(true)
+  notifications    Boolean   @default(true)
 }
 
 model Company {
-  id                String   @id @default(cuid())
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                String    @id @default(cuid())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
   name              String
-  cnpj              String?   
+  cnpj              String?
   principalActivity String?
   activities        String?
   occupation        String?
   capitalSocial     String?
-  source            Source   @default(MANUAL)
-  status            String   @default("PENDING")
+  source            Source    @default(MANUAL)
+  status            String    @default("PENDING")
   address           Address?
   processes         Process[]
 }
 
 model Address {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  street      String
-  number      String
-  complement  String?
-  district    String
-  city        String
-  state       String
-  cep         String
+  street     String
+  number     String
+  complement String?
+  district   String
+  city       String
+  state      String
+  cep        String
 
-  company     Company?  @relation(fields: [companyId], references: [id])
-  companyId   String?   @unique
-  client      Client?   @relation(fields: [clientId], references: [id])
-  clientId    String?   @unique
+  company   Company? @relation(fields: [companyId], references: [id])
+  companyId String?  @unique
+  client    Client?  @relation(fields: [clientId], references: [id])
+  clientId  String?  @unique
 }
 
 model Process {
@@ -161,161 +182,159 @@ model Process {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  client    Client   @relation(fields: [clientId], references: [id])
-  clientId  String
-  company   Company? @relation(fields: [companyId], references: [id])
-  companyId String?
-  operator  Operator? @relation(fields: [operatorId], references: [id]) // operador encarregado do processo
-  operatorId String?
-
-  status    ProcessStatus   @default(PENDING_DOCS)
-  priority  ProcessPriority
-  type      ProcessType
-  progress  Int            @default(0)
-  source    Source         @default(MANUAL)
-  documents Document[]
-  timeline  TimelineEvent[]
-  isActive  Boolean        @default(true)
-  lastInteractionAt DateTime @default(now())
-  notifications Notification[]
-
+  client            Client            @relation(fields: [clientId], references: [id])
+  clientId          String
+  company           Company?          @relation(fields: [companyId], references: [id])
+  companyId         String?
+  operator          Operator?         @relation(fields: [operatorId], references: [id]) // operador encarregado do processo
+  operatorId        String?
+  pendingTypeData   PendingDataType[] @default([])
+  status            ProcessStatus     @default(CREATED)
+  priority          ProcessPriority
+  type              ProcessType
+  progress          Int               @default(0)
+  source            Source            @default(MANUAL)
+  documents         Document[]
+  timeline          TimelineEvent[]
+  isActive          Boolean           @default(true)
+  lastInteractionAt DateTime          @default(now())
+  notifications     Notification[]
 }
 
 model Document {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String         @id @default(cuid())
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
   name      String
   status    DocumentStatus
   filePath  String?
   type      String
-  source    Source   @default(MANUAL)
-  process   Process  @relation(fields: [processId], references: [id])
+  source    Source         @default(MANUAL)
+  process   Process        @relation(fields: [processId], references: [id])
   processId String
-  verified  Boolean  @default(false)
+  verified  Boolean        @default(false)
 
- // Relações de upload quero que apareca na tipagem
-  uploadedBy     Operator?      @relation("UploadedDocuments", fields: [uploadedById], references: [id])
-  uploadedById   String?
+  // Relações de upload quero que apareca na tipagem
+  uploadedBy   Operator? @relation("UploadedDocuments", fields: [uploadedById], references: [id])
+  uploadedById String?
 
- // Relações de verificação quero que apareca na tipagem
-  verifiedBy     Operator?      @relation("VerifiedDocuments", fields: [verifiedById], references: [id])
-  verifiedById   String?
+  // Relações de verificação quero que apareca na tipagem
+  verifiedBy   Operator? @relation("VerifiedDocuments", fields: [verifiedById], references: [id])
+  verifiedById String?
 
   // Relações de rejeição
-  rejectionBy    Operator?      @relation("RejectedDocuments", fields: [rejectionById], references: [id])
-  rejectionById  String?
+  rejectionBy     Operator? @relation("RejectedDocuments", fields: [rejectionById], references: [id])
+  rejectionById   String?
   rejectionReason String?
 }
 
 model TimelineEvent {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String                @id @default(cuid())
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
   title       String
   description String?
   type        TimelineEventType
   category    TimelineEventCategory
   metadata    String?
-  source      Source   @default(MANUAL)
-  process     Process  @relation(fields: [processId], references: [id])
+  source      Source                @default(MANUAL)
+  process     Process               @relation(fields: [processId], references: [id])
   processId   String
-  operator    Operator? @relation(fields: [operatorId], references: [id])
+  operator    Operator?             @relation(fields: [operatorId], references: [id])
   operatorId  String?
   createdBy   String?
-  
+
   @@index([processId])
   @@index([createdAt])
 }
 
 model Operator {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String
-  email     String   @unique
-  password  String
-  role      String   @default("OPERATOR")
-  status    String   @default("ACTIVE")
-  processes Process[]
-  timeline  TimelineEvent[]
-  processesCount Int @default(0)
-  successRate    Float @default(0)
-  theme         String  @default("light")
-  sentNotifications     Notification[] @relation("SentNotifications")
-  receivedNotifications Notification[] @relation("ReceivedNotifications")
-  uploadedDocuments  Document[] @relation("UploadedDocuments")
-  verifiedDocuments  Document[] @relation("VerifiedDocuments")
-  rejectedDocuments  Document[] @relation("RejectedDocuments")
+  id                    String          @id @default(cuid())
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  name                  String
+  email                 String          @unique
+  password              String
+  role                  String          @default("OPERATOR")
+  status                String          @default("ACTIVE")
+  processes             Process[]
+  timeline              TimelineEvent[]
+  processesCount        Int             @default(0)
+  successRate           Float           @default(0)
+  theme                 String          @default("light")
+  sentNotifications     Notification[]  @relation("SentNotifications")
+  receivedNotifications Notification[]  @relation("ReceivedNotifications")
+  uploadedDocuments     Document[]      @relation("UploadedDocuments")
+  verifiedDocuments     Document[]      @relation("VerifiedDocuments")
+  rejectedDocuments     Document[]      @relation("RejectedDocuments")
 }
 
 model SystemConfig {
-  id            String   @id @default(cuid())
-  key           String   @unique
-  value         String
-  description   String?
-  lastUpdated   DateTime @default(now())
-  updatedBy     String?
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  lastUpdated DateTime @default(now())
+  updatedBy   String?
 }
 
 model Analytics {
-  id            String   @id @default(cuid())
-  date          DateTime @default(now())
-  totalProcesses Int     @default(0)
-  completedProcesses Int @default(0)
-  activeClients   Int    @default(0)
-  botInteractions Int    @default(0)
-  avgProcessTime Float   @default(0)
-  avgResponseTime Float  @default(0)
-  botProcesses    Int    @default(0)
-  platformProcesses Int  @default(0)
-  manualProcesses  Int   @default(0)
+  id                 String   @id @default(cuid())
+  date               DateTime @default(now())
+  totalProcesses     Int      @default(0)
+  completedProcesses Int      @default(0)
+  activeClients      Int      @default(0)
+  botInteractions    Int      @default(0)
+  avgProcessTime     Float    @default(0)
+  avgResponseTime    Float    @default(0)
+  botProcesses       Int      @default(0)
+  platformProcesses  Int      @default(0)
+  manualProcesses    Int      @default(0)
 }
 
 model Notification {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  title       String
-  message     String
-  type        NotificationType
-  category    NotificationCategory
-  priority    NotificationPriority  @default(NORMAL)
-  status      NotificationStatus    @default(PENDING)
-  
-  viewed      Boolean  @default(false)
-  viewedAt    DateTime?
-  expiresAt   DateTime?
-  
+  title    String
+  message  String
+  type     NotificationType
+  category NotificationCategory
+  priority NotificationPriority @default(NORMAL)
+  status   NotificationStatus   @default(PENDING)
+
+  viewed    Boolean   @default(false)
+  viewedAt  DateTime?
+  expiresAt DateTime?
+
   // Metadados e rastreamento
-  metadata    String?  // Usando String ao invés de Json para SQLite
-  source      Source   @default(SYSTEM)
-  ipAddress   String?
-  userAgent   String?
+  metadata  String? // Usando String ao invés de Json para SQLite
+  source    Source  @default(SYSTEM)
+  ipAddress String?
+  userAgent String?
 
-  
   // Relacionamentos
-  processId   String?
-  process     Process? @relation(fields: [processId], references: [id])
-  
+  processId String?
+  process   Process? @relation(fields: [processId], references: [id])
+
   // Remetente (pode ser sistema ou operador)
-  senderId    String?
-  sender      Operator? @relation("SentNotifications", fields: [senderId], references: [id])
-  
+  senderId String?
+  sender   Operator? @relation("SentNotifications", fields: [senderId], references: [id])
+
   // Destinatário (operador que recebe)
   recipientId String
   recipient   Operator @relation("ReceivedNotifications", fields: [recipientId], references: [id])
-  
+
   // Ações relacionadas
-  actionType  String?
-  actionUrl   String?
-  actionData  String?  // Usando String ao invés de Json para SQLite
-  
+  actionType String?
+  actionUrl  String?
+  actionData String? // Usando String ao invés de Json para SQLite
+
   // Tentativas de entrega
-  deliveryAttempts Int @default(0)
+  deliveryAttempts    Int       @default(0)
   lastDeliveryAttempt DateTime?
-  
+
   @@index([recipientId])
   @@index([senderId])
   @@index([processId])
@@ -324,23 +343,22 @@ model Notification {
   @@index([type])
 }
 
- //criar model de bot para quando rodarmos o bot, colocarmos o qrcode para o propio usuario se conectar e o hasConnected (true ou false)
+//criar model de bot para quando rodarmos o bot, colocarmos o qrcode para o propio usuario se conectar e o hasConnected (true ou false)
 model BotWhatsapp {
-  id String @id @default("singleton")
-  name String @default("Bot WhatsApp")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  qrcode String?
-  hasConnected Boolean @default(false)
-  status String @default("NOT_CREATED") // NOT_CREATED, DISCONNECTED, CONNECTING, CONNECTED, ERROR
+  id             String    @id @default("singleton")
+  name           String    @default("Bot WhatsApp")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  qrcode         String?
+  hasConnected   Boolean   @default(false)
+  status         String    @default("NOT_CREATED") // NOT_CREATED, DISCONNECTED, CONNECTING, CONNECTED, ERROR
   lastConnection DateTime?
-  phoneNumber String?
-  batteryLevel Int?
-  isOnline Boolean @default(false)
-  errorMessage String?
+  phoneNumber    String?
+  batteryLevel   Int?
+  isOnline       Boolean   @default(false)
+  errorMessage   String?
 
   @@map("bot_whatsapp")
 }
-
 
  

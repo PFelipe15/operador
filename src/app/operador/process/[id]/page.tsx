@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { ContextualHelp } from "@/components/knowledge/ContextualHelp";
 import { AssignToMeButton } from "@/components/layout/assigmeButton";
+import { PendingDataBadge } from "@/components/layout/pendent_data";
 import { TimelineEvent } from "@/components/layout/timelineEvent";
 import { DocumentUploadModal } from "@/components/modals/document-upload-modal";
-import { EditableField } from '@/components/process/EditableField';
+import { EditableField } from "@/components/process/EditableField";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -31,7 +33,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
-import { MEI_ANALYSIS_STEPS } from "@/lib/constants";
+import { CheckItem, MEI_ANALYSIS_STEPS } from "@/lib/constants";
 import {
   cn,
   formatCNPJ,
@@ -57,6 +59,7 @@ import {
   Document,
   DocumentStatus,
   Operator,
+  PendingDataType,
   Process,
   ProcessStatus,
   TimelineEventCategory,
@@ -66,6 +69,7 @@ import {
 import { format } from "date-fns";
 import {
   Activity,
+  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   Bell,
@@ -82,18 +86,21 @@ import {
   LightbulbIcon,
   Mail,
   MapPin,
+  MessageSquare,
   Phone,
-  PlayCircle,
+  Shield,
   Tag,
   TrendingUp,
   Upload,
   User2,
+  Wifi,
   XCircle
 } from "lucide-react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
-  
+
 interface ProcessStats {
   successRate: number;
   avgProcessTime: number;
@@ -122,16 +129,15 @@ type DocumentWithRelations = Document & {
   metadata?: string;
 };
 
-
 const ProcessApproved = ({ process }: { process: ProcessWithRelations }) => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-xl border shadow-sm p-8 space-y-8">
         {/* Cabeçalho com Ilustração */}
         <div className="flex flex-col items-center text-center space-y-4">
-          <img 
-            src="/figuras/completed.svg" 
-            alt="Processo Aprovado" 
+          <img
+            src="/figuras/completed.svg"
+            alt="Processo Aprovado"
             className="w-48 h-48"
           />
           <div>
@@ -152,7 +158,9 @@ const ProcessApproved = ({ process }: { process: ProcessWithRelations }) => {
                 <Calendar className="h-5 w-5 text-emerald-600" />
               </div>
               <div className="flex-1">
-                <p className="text-sm text-emerald-700 font-medium">Data de Aprovação</p>
+                <p className="text-sm text-emerald-700 font-medium">
+                  Data de Aprovação
+                </p>
                 <p className="text-sm text-emerald-600">
                   {format(new Date(process.updatedAt), "dd/MM/yyyy 'às' HH:mm")}
                 </p>
@@ -166,8 +174,12 @@ const ProcessApproved = ({ process }: { process: ProcessWithRelations }) => {
                 <User2 className="h-5 w-5 text-emerald-600" />
               </div>
               <div className="flex-1">
-                <p className="text-sm text-emerald-700 font-medium">Aprovado por</p>
-                <p className="text-sm text-emerald-600">{process.operator?.name}</p>
+                <p className="text-sm text-emerald-700 font-medium">
+                  Aprovado por
+                </p>
+                <p className="text-sm text-emerald-600">
+                  {process.operator?.name}
+                </p>
               </div>
             </div>
           </div>
@@ -178,7 +190,9 @@ const ProcessApproved = ({ process }: { process: ProcessWithRelations }) => {
                 <Clock className="h-5 w-5 text-emerald-600" />
               </div>
               <div className="flex-1">
-                <p className="text-sm text-emerald-700 font-medium">Tempo Total</p>
+                <p className="text-sm text-emerald-700 font-medium">
+                  Tempo Total
+                </p>
                 <p className="text-sm text-emerald-600">
                   {formatTimeDifference(process.createdAt, process.updatedAt)}
                 </p>
@@ -208,7 +222,9 @@ const ProcessApproved = ({ process }: { process: ProcessWithRelations }) => {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">CPF</span>
-                <span className="font-medium">{formatCPF(process.client.cpf)}</span>
+                <span className="font-medium">
+                  {formatCPF(process.client.cpf)}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">Tipo de Processo</span>
@@ -216,7 +232,9 @@ const ProcessApproved = ({ process }: { process: ProcessWithRelations }) => {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">Progresso</span>
-                <span className="font-medium text-emerald-600">100% Concluído</span>
+                <span className="font-medium text-emerald-600">
+                  100% Concluído
+                </span>
               </div>
             </div>
           </div>
@@ -228,18 +246,19 @@ const ProcessApproved = ({ process }: { process: ProcessWithRelations }) => {
             <CheckCircle2 className="h-6 w-6 text-emerald-600" />
           </div>
           <div>
-            <h4 className="font-medium text-emerald-700">Processo Validado e Aprovado</h4>
+            <h4 className="font-medium text-emerald-700">
+              Processo Validado e Aprovado
+            </h4>
             <p className="text-sm text-emerald-600 mt-1">
-              Todas as verificações foram concluídas com sucesso. O processo está aprovado e pronto para as próximas etapas.
+              Todas as verificações foram concluídas com sucesso. O processo
+              está aprovado e pronto para as próximas etapas.
             </p>
           </div>
         </div>
       </div>
     </div>
-  )
-}
-
-
+  );
+};
 
 export default function ProcessDetails() {
   const [expandedStep, setExpandedStep] = useState<number | null>(0);
@@ -252,7 +271,10 @@ export default function ProcessDetails() {
   const [processStats, setProcessStats] = useState<ProcessStats | null>(null);
   const { operator } = useAuth();
   const [rejectionReason, setRejectionReason] = useState<string | null>(null);
-
+  const [pendingItems, setPendingItems] = useState<PendingDataType[]>([]);
+  const [previouslyPendingItems, setPreviouslyPendingItems] = useState<PendingDataType[]>([]);
+  const [pendingItemsChanged, setPendingItemsChanged] = useState(false);
+ 
   // Função para carregar o estado dos checkboxes do processo
   const loadCheckedItems = useCallback(async () => {
     if (!process) return;
@@ -276,7 +298,8 @@ export default function ProcessDetails() {
             // Reconstruir as chaves dos checkboxes com o formato "STEP_ID-ITEM_ID"
             Object.entries(metadata.checkedItems).forEach(
               ([itemId, checked]) => {
-                savedCheckedItems[`${metadata.step}-${itemId}`] = checked as boolean;
+                savedCheckedItems[`${metadata.step}-${itemId}`] =
+                  checked as boolean;
               }
             );
           }
@@ -323,15 +346,57 @@ export default function ProcessDetails() {
     fetchProcessStats();
   }, [params.id]);
 
-  const canCompleteStep = (
-    step?: (typeof MEI_ANALYSIS_STEPS)[keyof typeof MEI_ANALYSIS_STEPS]
-  ) => {
-    if (!step || !step.checkItems) return false;
+  useEffect(() => {
+    if (process?.pendingTypeData && process.pendingTypeData.length > 0) {
+      // Sincroniza os pendingItems com os dados do processo
+      const processPendingItems = process.pendingTypeData as PendingDataType[];
+      setPendingItems(processPendingItems);
+      setPreviouslyPendingItems(processPendingItems);
+      setPendingItemsChanged(false);
+    }
+  }, [process?.pendingTypeData]);
 
-    return step.checkItems
-      .filter((item) => item.required)
-      .every((item) => checkedItems[`${step.id}-${item.id}`]);
-  };
+  // Mova a definição da função canCompleteStep para antes do useEffect que a utiliza
+  const canCompleteStep = useCallback(
+    (step: (typeof MEI_ANALYSIS_STEPS)[keyof typeof MEI_ANALYSIS_STEPS]) => {
+      if (!step || !step.checkItems) return false;
+      
+      // Verifica se todos os itens obrigatórios estão marcados
+      const requiredItems = step.checkItems.filter((item) => item.required);
+      
+      // Verifica se há itens obrigatórios
+      if (requiredItems.length === 0) return true;
+      
+      // Verifica se todos os itens obrigatórios estão marcados
+      const allRequiredChecked = requiredItems.every((item) => {
+        // Usa a chave correta para verificar o estado do checkbox
+        const checkboxKey = `${step.id}-${item.id}`;
+        console.log(`Verificando item ${checkboxKey}: ${checkedItems[checkboxKey]}`);
+        return !!checkedItems[checkboxKey];
+      });
+      
+      console.log(`Todos os itens obrigatórios marcados: ${allRequiredChecked}`);
+      return allRequiredChecked;
+    },
+    [checkedItems]
+  );
+
+  // Agora o useEffect pode usar a função canCompleteStep que já foi definida
+  useEffect(() => {
+    if (expandedStep !== null) {
+      const currentStep = Object.values(MEI_ANALYSIS_STEPS)[expandedStep];
+      console.log("Estado atual dos checkboxes:", checkedItems);
+      console.log("Step atual:", currentStep);
+      console.log("Pode concluir:", canCompleteStep(currentStep));
+      
+      if (currentStep.checkItems) {
+        currentStep.checkItems.forEach(item => {
+          const key = `${currentStep.id}-${item.id}`;
+          console.log(`Item ${item.label} (${key}): ${checkedItems[key] ? "Marcado" : "Não marcado"}`);
+        });
+      }
+    }
+  }, [checkedItems, expandedStep, canCompleteStep]);
 
   const handleStepComplete = async (
     step: (typeof MEI_ANALYSIS_STEPS)[keyof typeof MEI_ANALYSIS_STEPS]
@@ -383,55 +448,61 @@ export default function ProcessDetails() {
       return;
     }
 
+
+    if (process?.pendingTypeData && process.pendingTypeData.length > 0) {
+      toast.error("Não é possível concluir a etapa pois há itens pendentes");
+      return;
+    }
+
     try {
-    await toast.promise(
-      async () => {
-        // Faz a requisição
-        await fetch(`/api/processes/${params.id}/progress`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            step: step.id,
-            data: {
-              checkedItems: Object.entries(checkedItems)
-                .filter(([key]) => key.startsWith(step.id))
-                .reduce(
-                  (acc, [key, value]) => ({
-                    ...acc,
-                    [key.split("-")[1]]: value,
-                  }),
-                  {}
-                ),
-            }
-          }),
-        });
-
-        // Atualiza os dados
-        await fetchProcess();
-        await loadCheckedItems();
-
-        // Verifica próximo step
-        const nextStepIndex = Object.values(MEI_ANALYSIS_STEPS).findIndex(
-          (s) => s.progress > step.progress
-        );
-
-        if (
-          nextStepIndex !== -1 &&
-          nextStepIndex < Object.values(MEI_ANALYSIS_STEPS).length
-        ) {
-          setExpandedStep(nextStepIndex);
-        } else {
-          toast.success("Processo Concluído!", {
-            description: "Todas as etapas foram finalizadas com sucesso.",
+      await toast.promise(
+        async () => {
+          // Faz a requisição
+          await fetch(`/api/processes/${params.id}/progress`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              step: step.id,
+              data: {
+                checkedItems: Object.entries(checkedItems)
+                  .filter(([key]) => key.startsWith(step.id))
+                  .reduce(
+                    (acc, [key, value]) => ({
+                      ...acc,
+                      [key.split("-")[1]]: value,
+                    }),
+                    {}
+                  ),
+              },
+            }),
           });
+
+          // Atualiza os dados
+          await fetchProcess();
+          await loadCheckedItems();
+
+          // Verifica próximo step
+          const nextStepIndex = Object.values(MEI_ANALYSIS_STEPS).findIndex(
+            (s) => s.progress > step.progress
+          );
+
+          if (
+            nextStepIndex !== -1 &&
+            nextStepIndex < Object.values(MEI_ANALYSIS_STEPS).length
+          ) {
+            setExpandedStep(nextStepIndex);
+          } else {
+            toast.success("Processo Concluído!", {
+              description: "Todas as etapas foram finalizadas com sucesso.",
+            });
+          }
+        },
+        {
+          loading: "Concluindo etapa...",
+          success: "Etapa concluída com sucesso",
+          error: "Erro ao concluir etapa",
         }
-      },
-      {
-        loading: 'Concluindo etapa...',
-        success: 'Etapa concluída com sucesso',
-        error: "Erro ao concluir etapa"
-      }
-    );
+      );
     } catch (error) {
       console.error("Erro:", error);
       toast.error("Erro ao concluir etapa", {
@@ -454,9 +525,10 @@ export default function ProcessDetails() {
 
   const handleStartProcess = async () => {
     try {
-
-      if(process?.operatorId === null){
-        toast.error("Não foi possível iniciar o processo pois o processo não tem operador atribuído");
+      if (process?.operatorId === null) {
+        toast.error(
+          "Não foi possível iniciar o processo pois o processo não tem operador atribuído"
+        );
         return;
       }
 
@@ -469,17 +541,17 @@ export default function ProcessDetails() {
               step: "START_PROCESS",
               data: {
                 previousStatus: process?.status,
-                newStatus: "PENDING_DATA",
+                newStatus: "ANALYZING_DATA",
               },
             }),
           });
-          
+
           await fetchProcess();
         },
         {
-          loading: 'Iniciando processo...',
-          success: 'Processo iniciado com sucesso',
-          error: 'Erro ao iniciar processo'
+          loading: "Iniciando processo...",
+          success: "Processo iniciado com sucesso",
+          error: "Erro ao iniciar processo",
         }
       );
     } catch (error) {
@@ -508,8 +580,6 @@ export default function ProcessDetails() {
       setLoading(false);
     }
   };
-
- 
 
   if (loading) {
     return (
@@ -540,44 +610,41 @@ export default function ProcessDetails() {
     try {
       await toast.promise(
         async () => {
-          await fetch(
-            `/api/processes/${process.id}/documents/${documentId}`,
-            {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                verified: true,
-                status: status,
-                rejectionReason: status === "REJECTED" ? rejectionReason : null,
+          await fetch(`/api/processes/${process.id}/documents/${documentId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              verified: true,
+              status: status,
+              rejectionReason: status === "REJECTED" ? rejectionReason : null,
+              operatorId: operatorId,
+              timelineEvent: {
+                title: "Documento Verificado",
+                description: "Documento foi verificado e validado",
+                type: "SUCCESS" as TimelineEventType,
+                category: "DOCUMENT" as TimelineEventCategory,
+                source: "MANUAL",
                 operatorId: operatorId,
-                timelineEvent: {
-                  title: "Documento Verificado",
-                  description: "Documento foi verificado e validado",
-                  type: "SUCCESS" as TimelineEventType,
-                  category: "DOCUMENT" as TimelineEventCategory,
-                  source: "MANUAL",
-                  operatorId: operatorId,
-                  operatorProcessId: process.operator?.id,
-                  metadata: JSON.stringify({
-                    documentId,
-                    documentType: process.documents.find(
-                      (d: Document) => d.id === documentId
-                    )?.name,
-                  }),
-                },
-              }),
-            }
-          );
+                operatorProcessId: process.operator?.id,
+                metadata: JSON.stringify({
+                  documentId,
+                  documentType: process.documents.find(
+                    (d: Document) => d.id === documentId
+                  )?.name,
+                }),
+              },
+            }),
+          });
 
           setRejectionReason(null);
           await fetchProcess();
         },
         {
-          loading: 'Verificando documento...',
-          success: 'Documento verificado com sucesso',
-          error: 'Erro ao verificar documento'
+          loading: "Verificando documento...",
+          success: "Documento verificado com sucesso",
+          error: "Erro ao verificar documento",
         }
       );
     } catch (error) {
@@ -590,32 +657,33 @@ export default function ProcessDetails() {
 
   const handleUpdateClientField = async (field: string, value: string) => {
     try {
-
-      if(process.operatorId === null){
-        toast.error("Não foi possível atualizar o campo pois o processo não tem operador atribuído");
+      if (process.operatorId === null) {
+        toast.error(
+          "Não foi possível atualizar o campo pois o processo não tem operador atribuído"
+        );
         return;
       }
 
       await toast.promise(
         async () => {
           const response = await fetch(`/api/processes/${process.id}/client`, {
-            method: 'PATCH',
+            method: "PATCH",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
               field,
-              value
-            })
+              value,
+            }),
           });
 
-          if (!response.ok) throw new Error('Erro ao atualizar informação');
+          if (!response.ok) throw new Error("Erro ao atualizar informação");
           await fetchProcess();
         },
         {
-          loading: 'Atualizando informação...',
-          success: 'Informação atualizada com sucesso',
-          error: 'Erro ao atualizar informação'
+          loading: "Atualizando informação...",
+          success: "Informação atualizada com sucesso",
+          error: "Erro ao atualizar informação",
         }
       );
     } catch (error) {
@@ -625,9 +693,10 @@ export default function ProcessDetails() {
   };
 
   const handleUpdateCompanyField = async (field: string, value: string) => {
-
-    if(process.operatorId === null){
-      toast.error("Não foi possível atualizar o campo pois o processo não tem operador atribuído");
+    if (process.operatorId === null) {
+      toast.error(
+        "Não foi possível atualizar o campo pois o processo não tem operador atribuído"
+      );
       return;
     }
 
@@ -635,29 +704,110 @@ export default function ProcessDetails() {
       await toast.promise(
         async () => {
           const response = await fetch(`/api/processes/${process.id}/company`, {
-            method: 'PATCH',
+            method: "PATCH",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
               field,
-              value
-            })
+              value,
+            }),
           });
 
-          if (!response.ok) throw new Error('Erro ao atualizar informação');
+          if (!response.ok) throw new Error("Erro ao atualizar informação");
           await fetchProcess();
         },
         {
-          loading: 'Atualizando informação...',
-          success: 'Informação atualizada com sucesso',
-          error: 'Erro ao atualizar informação'
+          loading: "Atualizando informação...",
+          success: "Informação atualizada com sucesso",
+          error: "Erro ao atualizar informação",
         }
       );
     } catch (error) {
       console.error("Erro:", error);
       toast.error("Erro ao atualizar informação");
     }
+  };
+
+  const handleMarkAsPending = (item: any) => {
+    if (!item.pendingTypeData || item.pendingTypeData.length === 0) return;
+    
+    // Adiciona os novos tipos pendentes
+    const updatedPendingItems = [...pendingItems];
+    
+    item.pendingTypeData.forEach((type: PendingDataType) => {
+      if (!updatedPendingItems.includes(type)) {
+        updatedPendingItems.push(type);
+      }
+    });
+    
+    setPendingItems(updatedPendingItems);
+    // Verifica se houve mudança em relação aos itens originais
+    const hasChanged = !arraysAreEqual(updatedPendingItems, previouslyPendingItems);
+    setPendingItemsChanged(hasChanged);
+  };
+
+  const handleRemovePending = (item: any) => {
+    if (!item.pendingTypeData || item.pendingTypeData.length === 0) return;
+    
+    // Remove todos os tipos pendentes deste item
+    const updatedPendingItems = pendingItems.filter((type) => 
+      !item.pendingTypeData.includes(type));
+    setPendingItems(updatedPendingItems);
+    
+    // Verifica se houve mudança em relação aos itens originais
+    const hasChanged = !arraysAreEqual(updatedPendingItems, previouslyPendingItems);
+    setPendingItemsChanged(hasChanged);
+  };
+
+  const handleConfirmPendingChanges = async () => {
+    try {
+      await toast.promise(
+        async () => {
+          // Determina quais itens foram adicionados e quais foram removidos
+          const addedItems = pendingItems.filter(item => !previouslyPendingItems.includes(item));
+          const removedItems = previouslyPendingItems.filter(item => !pendingItems.includes(item));
+          
+           await fetch(`/api/processes/${params.id}/progress`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              step: "PENDING_DATA_UPDATE",
+              data: {
+                pendingTypeData: pendingItems,
+                addedItems,
+                removedItems,
+                previousStatus: process?.status
+              }
+            })
+          });
+          
+           
+
+
+          // Atualiza o processo local com os dados atualizados
+          await fetchProcess();
+          
+          // Reseta o estado de mudança
+          setPendingItemsChanged(false);
+        },
+        {
+          loading: "Atualizando dados pendentes...",
+          success: "Dados pendentes atualizados com sucesso",
+          error: "Erro ao atualizar dados pendentes"
+        }
+      );
+    } catch (error) {
+      console.error("Erro:", error);
+    }
+  };
+
+  // Função auxiliar para comparar arrays
+  const arraysAreEqual = (arr1: any[], arr2: any[]) => {
+    if (arr1.length !== arr2.length) return false;
+    const sortedArr1 = [...arr1].sort();
+    const sortedArr2 = [...arr2].sort();
+    return sortedArr1.every((val, idx) => val === sortedArr2[idx]);
   };
 
   return (
@@ -710,7 +860,6 @@ export default function ProcessDetails() {
                         <User2 className="h-3.5 w-3.5" />
                         {process.operator?.name || "Não atribuído"}
                       </Badge>
- 
                     </div>
                   </div>
                   <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
@@ -732,38 +881,32 @@ export default function ProcessDetails() {
               </div>
             </div>
 
-
             {/* Ações rápidas melhoradas */}
             <div className="flex items-center gap-2">
-            <ContextualHelp />
+              <ContextualHelp />
 
-            {process.operatorId ? (
-              <div className="flex items-center justify- gap-2">
-                <DocumentUploadModal
-                  processId={process.id}
-                  onUploadSuccess={() => {
-                    fetchProcess();
-                  }}
-                  operatorProcessId={process.operator?.id}
-                />
-                <Button variant="outline" className="gap-2">
-                  <Mail className="h-4 w-4" />
-                  Enviar Email
-                </Button>
-
- 
-              </div>
-
-            ) : (
-              
+              {process.operatorId ? (
+                <div className="flex items-center justify- gap-2">
+                  <DocumentUploadModal
+                    processId={process.id}
+                    onUploadSuccess={() => {
+                      fetchProcess();
+                    }}
+                    operatorProcessId={process.operator?.id}
+                  />
+                  <Button variant="outline" className="gap-2">
+                    <Mail className="h-4 w-4" />
+                    Enviar Email
+                  </Button>
+                </div>
+              ) : (
                 <AssignToMeButton
                   processId={process.id}
                   onAssign={() => {
                     fetchProcess();
                   }}
                 />
-             
-            )}
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2 mt-2">
@@ -817,7 +960,7 @@ export default function ProcessDetails() {
                 </p>
                 <Progress
                   value={process.progress}
-                   className="h-2 bg-emerald-400 dark:bg-emerald-700"
+                  className="h-2 bg-emerald-400 dark:bg-emerald-700"
                 />
                 <div className="flex justify-between items-center">
                   <p className="text-lg font-semibold dark:text-gray-200">
@@ -844,8 +987,9 @@ export default function ProcessDetails() {
                   <div className="flex items-end gap-1">
                     <p className="text-lg font-semibold dark:text-gray-200">
                       {
-                        process.documents.filter((d:Document) => d.status === "VERIFIED")
-                          .length
+                        process.documents.filter(
+                          (d: Document) => d.status === "VERIFIED"
+                        ).length
                       }
                     </p>
                     <p className="text-sm text-muted-foreground dark:text-gray-400 mb-0.5">
@@ -945,12 +1089,19 @@ export default function ProcessDetails() {
                       <EditableField
                         label="Nome"
                         value={process.client.name}
-                        onSave={(value) => handleUpdateClientField('name', value)}
+                        onSave={(value) =>
+                          handleUpdateClientField("name", value)
+                        }
                       />
                       <EditableField
                         label="CPF"
                         value={formatCPF(process.client.cpf)}
-                        onSave={(value) => handleUpdateClientField('cpf', value.replace(/\D/g, ''))}
+                        onSave={(value) =>
+                          handleUpdateClientField(
+                            "cpf",
+                            value.replace(/\D/g, "")
+                          )
+                        }
                         mask={formatCPF}
                       />
                     </div>
@@ -961,13 +1112,20 @@ export default function ProcessDetails() {
                       <EditableField
                         label="Email"
                         value={process.client.email}
-                        onSave={(value) => handleUpdateClientField('email', value)}
+                        onSave={(value) =>
+                          handleUpdateClientField("email", value)
+                        }
                         type="email"
                       />
                       <EditableField
                         label="Telefone"
                         value={formatPhone(process.client.phone)}
-                        onSave={(value) => handleUpdateClientField('phone', value.replace(/\D/g, ''))}
+                        onSave={(value) =>
+                          handleUpdateClientField(
+                            "phone",
+                            value.replace(/\D/g, "")
+                          )
+                        }
                         mask={formatPhone}
                       />
                     </div>
@@ -1023,18 +1181,18 @@ export default function ProcessDetails() {
                           </div>
                           <div className="space-y-1">
                             <p className="text-base dark:text-gray-200">
-                              {process.client.address.street},{" "}
-                              {process.client.address.number}
-                              {process.client.address.complement &&
-                                ` - ${process.client.address.complement}`}
+                              {process.client.address?.street},{" "}
+                              {process.client.address?.number}
+                              {process.client.address?.complement &&
+                                ` - ${process.client.address?.complement}`}
                             </p>
                             <p className="text-sm text-muted-foreground dark:text-gray-400">
-                              {process.client.address.district},{" "}
-                              {process.client.address.city} -{" "}
-                              {process.client.address.state}
+                              {process.client.address?.district},{" "}
+                              {process.client.address?.city} -{" "}
+                              {process.client.address?.state}
                             </p>
                             <p className="text-sm text-muted-foreground dark:text-gray-400">
-                              CEP: {process.client.address.cep}
+                              CEP: {process.client.address?.cep}
                             </p>
                           </div>
                         </div>
@@ -1056,12 +1214,19 @@ export default function ProcessDetails() {
                       <EditableField
                         label="Razão Social"
                         value={process.company?.name}
-                        onSave={(value) => handleUpdateCompanyField('name', value)}
+                        onSave={(value) =>
+                          handleUpdateCompanyField("name", value)
+                        }
                       />
                       <EditableField
                         label="CNPJ"
-                        value={formatCNPJ(process.company?.cnpj || '')}
-                        onSave={(value) => handleUpdateCompanyField('cnpj', value.replace(/\D/g, ''))}
+                        value={formatCNPJ(process.company?.cnpj || "")}
+                        onSave={(value) =>
+                          handleUpdateCompanyField(
+                            "cnpj",
+                            value.replace(/\D/g, "")
+                          )
+                        }
                         mask={formatCNPJ}
                       />
                     </div>
@@ -1075,8 +1240,10 @@ export default function ProcessDetails() {
                       </div>
                       <EditableField
                         label="Atividade Principal"
-                        value={process.company?.principalActivity || ''}
-                        onSave={(value) => handleUpdateCompanyField('principalActivity', value)}
+                        value={process.company?.principalActivity || ""}
+                        onSave={(value) =>
+                          handleUpdateCompanyField("principalActivity", value)
+                        }
                         className="bg-primary/5 p-3 rounded-lg dark:bg-primary/10"
                       />
                     </div>
@@ -1112,8 +1279,15 @@ export default function ProcessDetails() {
                       </p>
                       <EditableField
                         label="Capital Social"
-                        value={formatCurrency(process.company?.capitalSocial || '')}
-                        onSave={(value) => handleUpdateCompanyField('capitalSocial', value.replace(/\D/g, ''))}
+                        value={formatCurrency(
+                          process.company?.capitalSocial || ""
+                        )}
+                        onSave={(value) =>
+                          handleUpdateCompanyField(
+                            "capitalSocial",
+                            value.replace(/\D/g, "")
+                          )
+                        }
                         mask={formatCurrency}
                       />
                     </div>
@@ -1128,10 +1302,10 @@ export default function ProcessDetails() {
                             </p>
                           </div>
                           <p className="text-base dark:text-gray-200">
-                            {process.company.address.street},{" "}
-                            {process.company.address.number}
-                            {process.company.address.complement &&
-                              `, ${process.company.address.complement}`}
+                            {process.company.address?.street},{" "}
+                            {process.company.address?.number}
+                            {process.company.address?.complement &&
+                              `, ${process.company.address?.complement}`}
                           </p>
                           <p className="text-sm text-muted-foreground dark:text-gray-400 mt-1">
                             {process.company.address.district},{" "}
@@ -1183,12 +1357,13 @@ export default function ProcessDetails() {
                       key={doc.id}
                       className={cn(
                         "p-4 rounded-lg border transition-all",
-                        doc.status === "VERIFIED" &&
-                          "bg-emerald-50/50 dark:bg-emerald-950/20",
-                        doc.status === "REJECTED" &&
-                          "bg-red-50/50 dark:bg-red-950/20",
-                        doc.status === "SENT" &&
-                          "bg-blue-50/50 dark:bg-blue-950/20"
+                        doc.status === "VERIFIED"
+                          ? "bg-emerald-50/50 dark:bg-emerald-950/20"
+                          : doc.status === "REJECTED"
+                          ? "bg-red-50/50 dark:bg-red-950/20"
+                          : doc.status === "SENT"
+                          ? "bg-blue-50/50 dark:bg-blue-950/20"
+                          : "bg-gray-50/50 dark:bg-gray-950/20"
                       )}
                     >
                       <div className="flex items-start justify-between">
@@ -1262,7 +1437,7 @@ export default function ProcessDetails() {
                                 <div className="flex items-center gap-2 text-emerald-600">
                                   <CheckCircle2 className="h-4 w-4" />
                                   <span>
-                                    Verificado por {doc.verifiedBy.name}  
+                                    Verificado por {doc.verifiedBy.name}
                                   </span>
                                 </div>
                               )}
@@ -1295,7 +1470,8 @@ export default function ProcessDetails() {
                                 </p>
                                 <div className="grid grid-cols-2 gap-2 mt-1">
                                   <div>
-                                    Tamanho: {JSON.parse(doc.metadata || "{}").fileSize}
+                                    Tamanho:{" "}
+                                    {JSON.parse(doc.metadata || "{}").fileSize}
                                   </div>
                                   <div>
                                     Tipo: {JSON.parse(doc.metadata).fileType}
@@ -1453,514 +1629,437 @@ export default function ProcessDetails() {
                   </span>
                 </div>
 
-                {process.status === "CREATED" ? (
-                  <Card className="bg-white/50 backdrop-blur-sm border-none shadow-lg">
-                    <CardHeader className="text-center pb-2">
-                      <CardTitle className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
-                        Iniciar Processo
-                      </CardTitle>
-                      <CardDescription className="text-gray-600 dark:text-gray-400">
-                        Vamos começar a análise do processo do seu cliente
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-8">
-                      {/* Cards de Informação */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-emerald-100 dark:bg-emerald-800 rounded-lg">
-                              <ClipboardCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-emerald-900 dark:text-emerald-100">
-                                Checklist
-                              </p>
-                              <p className="text-sm text-emerald-600 dark:text-emerald-400">
-                                Guia passo a passo
-                              </p>
-                            </div>
-                          </div>
+                {process.status === "CREATED" && (
+                  <Card className="bg-gradient-to-br from-white to-emerald-50 dark:from-gray-900 dark:to-emerald-950/30 backdrop-blur-sm border border-emerald-100 dark:border-emerald-900/30 shadow-lg overflow-hidden">
+                    <div className="flex flex-col md:flex-row">
+                      {/* Coluna da imagem - Agora com destaque e animação sutil */}
+                      <div className="md:w-2/5 relative overflow-hidden bg-emerald-100/50 dark:bg-emerald-900/20 flex items-center justify-center p-8">
+                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/80 to-emerald-50/30 dark:from-emerald-900/50 dark:to-emerald-950/10 z-0"></div>
+                        <div className="relative z-10 transform transition-transform duration-700 hover:scale-105">
+                          <Image 
+                            src="/figuras/hero_2.svg" 
+                            alt="Iniciar Processo" 
+                            width={300} 
+                            height={300}
+                            className="drop-shadow-xl"
+                          />
                         </div>
-
-                        <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
-                              <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-blue-900 dark:text-blue-100">
-                                Documentos
-                              </p>
-                              <p className="text-sm text-blue-600 dark:text-blue-400">
-                                Gestão simplificada
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="p-4 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-purple-100 dark:bg-purple-800 rounded-lg">
-                              <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-purple-900 dark:text-purple-100">
-                                Timeline
-                              </p>
-                              <p className="text-sm text-purple-600 dark:text-purple-400">
-                                Acompanhamento em tempo real
-                              </p>
-                            </div>
-                          </div>
+                        <div className="absolute bottom-4 left-4 right-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg p-3 shadow-md border border-emerald-100 dark:border-emerald-900/30">
+                          <p className="text-sm text-emerald-800 dark:text-emerald-300 font-medium">
+                            Ao iniciar o processo, você terá acesso a todas as ferramentas necessárias para uma análise completa.
+                          </p>
                         </div>
                       </div>
 
-                      {/* Seção de Destaque */}
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 rounded-2xl" />
-                        <div className="relative p-6 rounded-2xl border border-emerald-100 dark:border-emerald-800">
-                          <div className="grid md:grid-cols-2 gap-6 items-center">
-                            <div className="space-y-4">
-                              <h3 className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">
-                                Pronto para começar?
-                              </h3>
-                              <p className="text-gray-600 dark:text-gray-400">
-                                Ao iniciar o processo, você terá acesso a todas
-                                as ferramentas necessárias para uma análise
-                                completa e eficiente.
-                              </p>
-                              <Button
-                                onClick={handleStartProcess}
-                                className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-                              >
-                                <PlayCircle className="h-5 w-5 mr-2" />
-                                Iniciar Processo
-                              </Button>
+                      {/* Coluna do conteúdo */}
+                      <div className="md:w-3/5 p-6">
+                        <CardHeader className="pb-2 px-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-300 dark:border-emerald-800">
+                              Novo Processo
+                            </Badge>
+                            <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-800">
+                              {process.type === "ABERTURA_MEI" ? "Abertura de MEI" : process.type}
+                            </Badge>
+                          </div>
+                          <CardTitle className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+                            Iniciar Processo
+                          </CardTitle>
+                          <CardDescription className="text-emerald-600/80 dark:text-emerald-400/80 mt-1">
+                            Vamos começar a análise do processo do cliente <span className="font-medium">{process.client.name}</span>
+                          </CardDescription>
+                          <Button className="bg-emerald-500 text-white hover:bg-emerald-600" onClick={() => {
+                        handleStartProcess();
+                      }}>
+Começar                      </Button>
+                        </CardHeader>
+
+                        <CardContent className="space-y-6 px-0 pt-6">
+                          {/* Cards de Informação com ícones mais destacados */}
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="group p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/70 dark:from-emerald-900/30 dark:to-emerald-800/10 border border-emerald-200 dark:border-emerald-800/30 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+                              <div className="flex flex-col items-center text-center gap-3">
+                                <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-800/30 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-700/30 transition-colors">
+                                  <ClipboardCheck className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-emerald-700 dark:text-emerald-400">Checklist</p>
+                                  <p className="text-xs text-emerald-600/70 dark:text-emerald-500/70 mt-1">Verificação de dados</p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="group p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/70 dark:from-blue-900/30 dark:to-blue-800/10 border border-blue-200 dark:border-blue-800/30 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+                              <div className="flex flex-col items-center text-center gap-3">
+                                <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-800/30 group-hover:bg-blue-200 dark:group-hover:bg-blue-700/30 transition-colors">
+                                  <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-blue-700 dark:text-blue-400">Documentos</p>
+                                  <p className="text-xs text-blue-600/70 dark:text-blue-500/70 mt-1">Gestão documental</p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="group p-4 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100/70 dark:from-purple-900/30 dark:to-purple-800/10 border border-purple-200 dark:border-purple-800/30 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+                              <div className="flex flex-col items-center text-center gap-3">
+                                <div className="p-3 rounded-full bg-purple-100 dark:bg-purple-800/30 group-hover:bg-purple-200 dark:group-hover:bg-purple-700/30 transition-colors">
+                                  <Clock className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-purple-700 dark:text-purple-400">Timeline</p>
+                                  <p className="text-xs text-purple-600/70 dark:text-purple-500/70 mt-1">Histórico de eventos</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Cards de informações do processo */}
+                          <div className="mt-6 space-y-4">
+                            {/* Card de Acompanhamento em Tempo Real */}
+                            <div className="p-4 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/70 dark:from-blue-900/30 dark:to-blue-800/10 border border-blue-200 dark:border-blue-700">
+                              <div className="flex items-start gap-3">
+                                <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-800/30">
+                                  <Wifi className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <div>
+                                  <h3 className="text-sm font-medium text-blue-700 dark:text-blue-300">Acompanhamento em Tempo Real</h3>
+                                  <p className="text-sm text-blue-600/80 dark:text-blue-400/80 mt-1">
+                                    O cliente receberá atualizações instantâneas sobre o progresso do processo através do portal do cliente
+                                  </p>
+                                </div>
+                              </div>
                             </div>
 
-                            <div className="hidden md:block">
-                              <img
-                                src="/figuras/suporte.svg"
-                                alt="Iniciar Processo"
-                                className="w-full max-w-[300px] mx-auto"
-                              />
+                            {/* Card de Prazo Estimado */}
+                            <div className="p-4 rounded-lg bg-gradient-to-br from-amber-50 to-amber-100/70 dark:from-amber-900/30 dark:to-amber-800/10 border border-amber-200 dark:border-amber-700">
+                              <div className="flex items-start gap-3">
+                                <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-800/30">
+                                  <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                                </div>
+                                <div>
+                                  <h3 className="text-sm font-medium text-amber-700 dark:text-amber-300">Prazo Estimado</h3>
+                                  <p className="text-sm text-amber-600/80 dark:text-amber-400/80 mt-1">
+                                    Previsão de conclusão em até 5 dias úteis, com possibilidade de antecipação
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Card de Comunicação */}
+                            <div className="p-4 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100/70 dark:from-purple-900/30 dark:to-purple-800/10 border border-purple-200 dark:border-purple-700">
+                              <div className="flex items-start gap-3">
+                                <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-800/30">
+                                  <MessageSquare className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                </div>
+                                <div>
+                                  <h3 className="text-sm font-medium text-purple-700 dark:text-purple-300">Comunicação Integrada</h3>
+                                  <p className="text-sm text-purple-600/80 dark:text-purple-400/80 mt-1">
+                                    Notificações automáticas via email e SMS para manter o cliente informado sobre cada etapa
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Card de Segurança */}
+                            <div className="p-4 rounded-lg bg-gradient-to-br from-emerald-50 to-emerald-100/70 dark:from-emerald-900/30 dark:to-emerald-800/10 border border-emerald-200 dark:border-emerald-700">
+                              <div className="flex items-start gap-3">
+                                <div className="p-2 rounded-full bg-emerald-100 dark:bg-emerald-800/30">
+                                  <Shield className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                </div>
+                                <div>
+                                  <h3 className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Segurança e Conformidade</h3>
+                                  <p className="text-sm text-emerald-600/80 dark:text-emerald-400/80 mt-1">
+                                    Processo 100% seguro e em conformidade com a LGPD, com criptografia de ponta a ponta
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        </CardContent>
                       </div>
-
-                      {/* Lista de Benefícios */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-                            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-gray-100">
-                              Análise Automatizada
-                            </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              Sistema inteligente para validação de documentos
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-                            <Clock className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-gray-100">
-                              Acompanhamento em Tempo Real
-                            </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              Monitore cada etapa do processo
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
+                     
+                    </div>
                   </Card>
-                ) : (
+                )}  
+                {process.status !== "CREATED" && (
                   <div className="space-y-6">
-                    {/* Barra de Steps Horizontal */}
-                    <div className="relative mb-8">
+                    {/* Barra de Steps Horizontal simplificada */}
+                    <div className="relative mb-6">
                       {/* Linha de Progresso Base */}
-                      <div className="absolute top-[35px] left-0 right-0 h-[2px] bg-gray-200" />
+                      <div className="absolute top-[25px] left-0 right-0 h-[2px] bg-gray-200" />
 
                       {/* Linha de Progresso Ativa */}
                       <div
-                        className="absolute top-[35px] left-0 h-[2px] bg-emerald-500 transition-all duration-300"
+                        className="absolute top-[25px] left-0 h-[2px] bg-emerald-500 transition-all duration-300"
                         style={{ width: `${process.progress}%` }}
                       />
 
                       {/* Steps */}
                       <div className="relative flex justify-between">
-                        {Object.values(MEI_ANALYSIS_STEPS).map(
-                          (step, index) => {
-                            const StepIcon = step.icon;
-                            const isCompleted =
-                              process.progress >= step.progress;
-                            const isCurrent =
-                              process.progress < step.progress &&
-                              (index === 0 ||
-                                process.progress >=
-                                  Object.values(MEI_ANALYSIS_STEPS)[index - 1]
-                                    .progress);
-                            const isLocked = !isCompleted && !isCurrent;
+                        {Object.values(MEI_ANALYSIS_STEPS).map((step, index) => {
+                          const StepIcon = step.icon;
+                          const isCompleted = process.progress >= step.progress;
+                          const isCurrent =
+                            process.progress < step.progress &&
+                            (index === 0 ||
+                              process.progress >=
+                                Object.values(MEI_ANALYSIS_STEPS)[index - 1].progress);
+                          const isLocked = !isCompleted && !isCurrent;
 
-                            return (
+                          return (
+                            <div
+                              key={step.id}
+                              className="flex flex-col items-center"
+                              onClick={() => {
+                                if (!isLocked) {
+                                  setExpandedStep(expandedStep === index ? null : index);
+                                }
+                              }}
+                            >
+                              {/* Círculo do Step simplificado */}
                               <div
-                                key={step.id}
-                                className="flex flex-col items-center"
-                                onClick={() => {
-                                  if (!isLocked) {
-                                    setExpandedStep(
-                                      expandedStep === index ? null : index
-                                    );
-                                  }
-                                }}
-                              >
-                                {/* Etapa Label */}
-                                {isCurrent && (
-                                  <div className="mb-2 px-3 py-1 bg-emerald-500 text-white text-xs rounded-full">
-                                    Atual
-                                  </div>
+                                className={cn(
+                                  "w-[40px] h-[40px] rounded-full flex items-center justify-center cursor-pointer transition-all",
+                                  isCompleted && "bg-emerald-500 text-white",
+                                  isCurrent && "bg-emerald-500 text-white ring-2 ring-emerald-100",
+                                  isLocked && "bg-gray-100 text-gray-400"
                                 )}
-
-                                {/* Círculo do Step */}
-                                <div
-                                  className={cn(
-                                    "w-[70px] h-[70px] rounded-full flex items-center justify-center cursor-pointer transition-all duration-200",
-                                    isCompleted && "bg-emerald-500 text-white",
-                                    isCurrent &&
-                                      "bg-emerald-500 text-white ring-4 ring-emerald-100",
-                                    isLocked && "bg-gray-100 text-gray-400",
-                                    !isLocked && "hover:scale-105"
-                                  )}
-                                >
-                                  <StepIcon className="h-6 w-6" />
-                                </div>
-
-                                {/* Título e Progresso */}
-                                <div
-                                  className={cn(
-                                    "mt-3 text-center",
-                                    isCompleted || isCurrent
-                                      ? "text-emerald-700"
-                                      : "text-gray-500"
-                                  )}
-                                >
-                                  <p className="text-sm font-medium whitespace-nowrap">
-                                    {step.title}
-                                  </p>
-                                  <p className="text-xs mt-1">
-                                    {step.progress}%
-                                  </p>
-                                </div>
+                              >
+                                <StepIcon className="h-5 w-5" />
                               </div>
-                            );
-                          }
-                        )}
+
+                              {/* Título e Progresso */}
+                              <div className={cn(
+                                "mt-2 text-center",
+                                isCompleted || isCurrent ? "text-emerald-700" : "text-gray-500"
+                              )}>
+                                <p className="text-xs font-medium">{step.title}</p>
+                                <p className="text-xs mt-0.5">{step.progress}%</p>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
 
                     {process.status === ProcessStatus.APPROVED ? (
-                      <>
-                        <ProcessApproved process={process} />
-                      </>
+                      <ProcessApproved process={process} />
                     ) : (
-                      <>
-                        {/* Área de Conteúdo */}
-                        <div className="grid grid-cols-3 gap-6">
-                          {/* Coluna Principal - Checklist */}
-                          <div className="col-span-2 space-y-4">
-                            <div className="bg-white rounded-lg border p-6 space-y-6">
+                      <div className="grid grid-cols-3 gap-4">
+                        {/* Coluna Principal - Checklist */}
+                        <div className="col-span-2">
+                          <Card className="border shadow-sm">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-base font-medium">
+                                {Object.values(MEI_ANALYSIS_STEPS)[expandedStep || 0]?.title || ""}
+                              </CardTitle>
+                              <CardDescription>
+                                Complete todos os itens obrigatórios para prosseguir
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              
+
+                              {/* Lista de checagem simplificada */}
                               <div className="space-y-2">
-                                <h3 className="text-lg font-semibold">
-                                  {Object.values(MEI_ANALYSIS_STEPS)[
-                                    expandedStep || 0
-                                  ]?.title || ""}
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                  Complete todos os itens obrigatórios para
-                                  prosseguir
+                                {Object.values(MEI_ANALYSIS_STEPS)[expandedStep || 0]?.checkItems?.map((item:CheckItem) => {
+                                  // Verifica se o item está pendente (em qualquer lista)
+                                  const isPending = item.pendingTypeData?.some((type: PendingDataType) => 
+                                    pendingItems.includes(type));
+                                  
+                                  // Cria a chave correta para o checkbox
+                                  const checkboxKey = `${Object.values(MEI_ANALYSIS_STEPS)[expandedStep || 0].id}-${item.id}`;
+                                  
+                                  return (
+                                    <div key={item.id} className="space-y-2">
+                                      <div className={cn(
+                                        "flex items-center justify-between p-3 rounded-lg border transition-colors",
+                                        isPending 
+                                          ? "bg-yellow-100 border-yellow-300" 
+                                          : "bg-white hover:bg-gray-50/50"
+                                      )}>
+                                        <div className="flex items-start gap-3 flex-1">
+                                          <Checkbox
+                                            id={checkboxKey}
+                                            checked={checkedItems[checkboxKey] || false}
+                                            onCheckedChange={(checked) => {
+                                              setCheckedItems({
+                                                ...checkedItems,
+                                                [checkboxKey]: !!checked,
+                                              });
+                                            }}
+                                          />
+                                          <div className="space-y-1">
+                                            <Label htmlFor={item.id} className="text-sm">
+                                              {item.label}
+                                              {item.required && <span className="text-red-500 ml-1">*</span>}
+                                            </Label>
+                                            {/* Valor atual do campo com ícone */}
+                                            {item.id === "nome_completo" && (
+                                              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                                <User2 className="h-3 w-3" />
+                                                {process.client.name}
+                                              </p>
+                                            )}
+                                            {item.id === "cpf_valido" && (
+                                              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                                <FileText className="h-3 w-3" />
+                                                {process.client.cpf}
+                                              </p>
+                                             
+                                            )}
+
+                                            {item.id === "contatos_validos" && (
+                                              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                                <FileText className="h-3 w-3" />
+                                                {process.client.phone} | {process.client.email}
+                                              </p>
+                                            )}
+                                            
+                                          </div>
+                                        </div>
+                                        
+                                        {/* Botões de Pendência */}
+                                        {item.pendingTypeData && (
+                                          <>
+                                            {isPending ? (
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-7 text-xs text-yellow-700"
+                                                onClick={() => handleRemovePending(item)}
+                                              >
+                                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                                Remover Pendência
+                                              </Button>
+                                            ) : (
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-7 text-xs text-gray-500"
+                                                onClick={() => handleMarkAsPending(item)}
+                                              >
+                                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                                Marcar Pendente
+                                              </Button>
+                                            )}
+                                          </>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              
+                              {/* Botão de conclusão de etapa com feedback visual melhorado */}
+                              {expandedStep !== null && (
+                                <div className="pt-6 flex flex-col gap-3">
+                                  {!canCompleteStep(Object.values(MEI_ANALYSIS_STEPS)[expandedStep]) && (
+                                    <div className="p-3 rounded-md bg-amber-50 border border-amber-200">
+                                      <div className="flex items-start gap-2">
+                                        <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5" />
+                                        <div>
+                                          <p className="text-sm font-medium text-amber-700">
+                                            Itens obrigatórios pendentes
+                                          </p>
+                                          <p className="text-xs text-amber-600 mt-1">
+                                            Marque todos os itens obrigatórios para habilitar a conclusão da etapa
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  <Button
+                                    disabled={!canCompleteStep(Object.values(MEI_ANALYSIS_STEPS)[expandedStep])}
+                                    onClick={() => handleStepComplete(Object.values(MEI_ANALYSIS_STEPS)[expandedStep])}
+                                    className={cn(
+                                      "w-full h-12 text-white font-medium transition-all duration-300",
+                                      canCompleteStep(Object.values(MEI_ANALYSIS_STEPS)[expandedStep])
+                                        ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-md hover:shadow-lg"
+                                        : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                    )}
+                                  >
+                                    <CheckCircle2 className="h-5 w-5 mr-2" />
+                                    Concluir Etapa
+                                  </Button>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        {/* Coluna Lateral - Informações da Etapa */}
+                        <div>
+                          <Card className="border shadow-sm">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-base font-medium flex items-center gap-2">
+                                <Info className="h-4 w-4 text-primary" />
+                                Informações
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div>
+                                <h4 className="text-xs font-medium uppercase text-muted-foreground mb-2">
+                                  Descrição
+                                </h4>
+                                <p className="text-sm">
+                                  Verificação dos dados cadastrais do cliente
                                 </p>
                               </div>
 
-                              {/* Checklist items */}
-                              <div className="space-y-3">
-                                {expandedStep !== null &&
-                                  Object.values(MEI_ANALYSIS_STEPS)[
-                                    expandedStep
-                                  ]?.checkItems?.map((item) => (
-                                    <div
-                                      key={item.id}
-                                      className={cn(
-                                        "group relative p-4 rounded-lg border transition-all duration-200",
-                                        checkedItems[
-                                          `${
-                                            Object.values(MEI_ANALYSIS_STEPS)[
-                                              expandedStep
-                                            ].id
-                                          }-${item.id}`
-                                        ]
-                                          ? "bg-emerald-50 border-emerald-200"
-                                          : "hover:bg-gray-50/50"
-                                      )}
-                                    >
-                                      <div className="flex items-center gap-4">
-                                        <Checkbox
-                                          id={`${
-                                            Object.values(MEI_ANALYSIS_STEPS)[
-                                              expandedStep
-                                            ].id
-                                          }-${item.id}`}
-                                          checked={
-                                            checkedItems[
-                                              `${
-                                                Object.values(
-                                                  MEI_ANALYSIS_STEPS
-                                                )[expandedStep].id
-                                              }-${item.id}`
-                                            ]
-                                          }
-                                          onCheckedChange={(checked) => {
-                                            setCheckedItems((prev) => ({
-                                              ...prev,
-                                              [`${
-                                                Object.values(
-                                                  MEI_ANALYSIS_STEPS
-                                                )[expandedStep].id
-                                              }-${item.id}`]: checked as boolean,
-                                            }));
-                                          }}
-                                          className="h-5 w-5"
-                                        />
-
-                                        <div className="flex-1">
-                                          <div className="flex items-center justify-between">
-                                            <label
-                                              htmlFor={`${
-                                                Object.values(
-                                                  MEI_ANALYSIS_STEPS
-                                                )[expandedStep].id
-                                              }-${item.id}`}
-                                              className="text-sm font-medium cursor-pointer"
-                                            >
-                                              {item.label}
-                                              {item.required && (
-                                                <span className="text-red-500 ml-1">
-                                                  *
-                                                </span>
-                                              )}
-                                            </label>
-
-                                            {checkedItems[
-                                              `${
-                                                Object.values(
-                                                  MEI_ANALYSIS_STEPS
-                                                )[expandedStep].id
-                                              }-${item.id}`
-                                            ] && (
-                                              <Badge
-                                                variant="outline"
-                                                className="bg-emerald-50 text-emerald-700 border-emerald-200"
-                                              >
-                                                <CheckCircle2 className="h-3 w-3 mr-1" />
-                                                Verificado
-                                              </Badge>
-                                            )}
-                                          </div>
-
-                                          <div className="mt-2 flex items-center gap-3 text-sm text-muted-foreground">
-                                            {item.id === "nome_completo" && (
-                                              <>
-                                                <User2 className="h-4 w-4" />
-                                                <span>
-                                                  {process.client.name}
-                                                </span>
-                                              </>
-                                            )}
-
-                                            {item.id === "cpf_valido" && (
-                                              <>
-                                                <FileText className="h-4 w-4" />
-                                                <span>
-                                                  {formatCPF(
-                                                    process.client.cpf
-                                                  )}
-                                                </span>
-                                              </>
-                                            )}
-
-                                            {item.id === "rg_valido" && (
-                                              <>
-                                                <FileText className="h-4 w-4" />
-                                                <span
-                                                  className={
-                                                    !process.client.rg
-                                                      ? "text-amber-600"
-                                                      : ""
-                                                  }
-                                                >
-                                                  {process.client.rg ||
-                                                    "Não informado"}
-                                                </span>
-                                              </>
-                                            )}
-
-                                            {item.id === "endereco_completo" &&
-                                              process.client.address && (
-                                                <>
-                                                  <MapPin className="h-4 w-4" />
-                                                  <span>
-                                                    {
-                                                      process.client.address
-                                                        .street
-                                                    }
-                                                    ,{" "}
-                                                    {
-                                                      process.client.address
-                                                        .number
-                                                    }
-                                                    {process.client.address
-                                                      .complement &&
-                                                      ` - ${process.client.address.complement}`}
-                                                  </span>
-                                                </>
-                                              )}
-
-                                            {item.id === "telefone_email" && (
-                                              <>
-                                                <Phone className="h-4 w-4" />
-                                                <span>
-                                                  {formatPhone(
-                                                    process.client.phone
-                                                  )}
-                                                </span>
-                                                <Mail className="h-4 w-4 ml-2" />
-                                                <span>
-                                                  {process.client.email}
-                                                </span>
-                                              </>
-                                            )}
-                                          </div>
-                                        </div>
+                              {/* Verificar se o processo tem dados pendentes registrados */}
+                              {process.pendingTypeData && process.pendingTypeData.length > 0 && (
+                                <>
+                                  <Separator />
+                                  <div>
+                                    <h4 className="text-xs font-medium uppercase text-yellow-600 flex items-center gap-1 mb-2">
+                                      <AlertTriangle className="h-3 w-3" />
+                                      Dados Pendentes
+                                    </h4>
+                                    <div className="space-y-2 bg-yellow-50 p-2 rounded-md border border-yellow-100">
+                                      <div className="flex flex-wrap gap-1.5">
+                                        {process.pendingTypeData.map((type, index) => (
+                                          <PendingDataBadge key={index} type={type as PendingDataType} />
+                                        ))}
                                       </div>
-
-                                      <div
-                                        className={cn(
-                                          "absolute left-0 top-0 bottom-0 w-1 rounded-l-lg transition-all",
-                                          checkedItems[
-                                            `${
-                                              Object.values(MEI_ANALYSIS_STEPS)[
-                                                expandedStep
-                                              ].id
-                                            }-${item.id}`
-                                          ]
-                                            ? "bg-emerald-500"
-                                            : "bg-transparent group-hover:bg-gray-200"
-                                        )}
-                                      />
                                     </div>
-                                  ))}
-                              </div>
+                                  </div>
+                                </>
+                              )}
 
-                              <Button
-                                className={cn(
-                                  "w-full mt-6",
-                                  canCompleteStep(
-                                    Object.values(MEI_ANALYSIS_STEPS)[
-                                      expandedStep || 0
-                                    ]
-                                  )
-                                    ? "bg-emerald-500 hover:bg-emerald-600"
-                                    : ""
-                                )}
-                                disabled={
-                                  !canCompleteStep(
-                                    Object.values(MEI_ANALYSIS_STEPS)[
-                                      expandedStep || 0
-                                    ]
-                                  )
-                                }
-                                onClick={() => {
-                                  if (
-                                    expandedStep !== null &&
-                                    Object.values(MEI_ANALYSIS_STEPS)[
-                                      expandedStep
-                                    ]
-                                  ) {
-                                    handleStepComplete(
-                                      Object.values(MEI_ANALYSIS_STEPS)[
-                                        expandedStep
-                                      ]
-                                    );
-                                  }
-                                }}
-                              >
-                                <CheckCircle2 className="h-4 w-4 mr-2" />
-                                Concluir Etapa
-                              </Button>
-                            </div>
-                          </div>
+                              <Separator />
 
-                          {/* Coluna Lateral - Informações da Etapa */}
-                          <div className="space-y-4">
-                            <div className="bg-white rounded-lg border p-6">
-                              <div className="space-y-6">
-                                <div className="flex items-center gap-2 text-primary">
-                                  <Info className="h-5 w-5" />
-                                  <h3 className="font-semibold">
-                                    Informações da Etapa
-                                  </h3>
-                                </div>
-
-                                <div>
-                                  <h4 className="text-sm font-medium mb-2">
-                                    Descrição
-                                  </h4>
-                                  <p className="text-sm text-muted-foreground">
-                                    Verificação dos dados cadastrais do cliente
-                                  </p>
-                                </div>
-
-                                <Separator />
-
-                                <div>
-                                  <h4 className="text-sm font-medium mb-3">
-                                    Dicas
-                                  </h4>
-                                  <div className="space-y-3">
-                                    <div className="flex items-start gap-2">
-                                      <LightbulbIcon className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                                      <p className="text-sm text-muted-foreground">
-                                        Certifique-se de que todos os documentos
-                                        estejam legíveis
-                                      </p>
-                                    </div>
-                                    <div className="flex items-start gap-2">
-                                      <LightbulbIcon className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                                      <p className="text-sm text-muted-foreground">
-                                        Compare os dados com documentos
-                                        originais quando possível
-                                      </p>
-                                    </div>
-                                    <div className="flex items-start gap-2">
-                                      <LightbulbIcon className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                                      <p className="text-sm text-muted-foreground">
-                                        Verifique a validade dos documentos
-                                        apresentados
-                                      </p>
-                                    </div>
+                              <div>
+                                <h4 className="text-xs font-medium uppercase text-muted-foreground mb-2">
+                                  Dicas
+                                </h4>
+                                <div className="space-y-2">
+                                  <div className="flex items-start gap-2">
+                                    <LightbulbIcon className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
+                                    <p className="text-xs text-muted-foreground">
+                                      Certifique-se de que todos os documentos estejam legíveis
+                                    </p>
+                                  </div>
+                                  <div className="flex items-start gap-2">
+                                    <LightbulbIcon className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
+                                    <p className="text-xs text-muted-foreground">
+                                      Compare os dados com documentos originais quando possível
+                                    </p>
+                                  </div>
+                                  <div className="flex items-start gap-2">
+                                    <LightbulbIcon className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
+                                    <p className="text-xs text-muted-foreground">
+                                      Verifique a validade dos documentos apresentados
+                                    </p>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          </div>
+                            </CardContent>
+                          </Card>
                         </div>
-                      </>
+                      </div>
                     )}
                   </div>
                 )}
@@ -1983,12 +2082,43 @@ export default function ProcessDetails() {
             borderRadius: "8px",
             padding: "16px",
           },
-           
-         
         }}
       />
+
+      {pendingItemsChanged && (
+        <div className="fixed bottom-0 left-0 right-0 bg-yellow-50 border-t border-yellow-200 p-4 shadow-lg z-10">
+          <div className="container mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-600" />
+              <p className="text-sm text-yellow-700">
+                Você tem alterações pendentes nos dados do processo.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setPendingItems([...previouslyPendingItems]);
+                  setPendingItemsChanged(false);
+                }}
+                className="h-9 text-sm"
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                className="gap-1 bg-yellow-500 hover:bg-yellow-600 h-9 text-sm"
+                onClick={handleConfirmPendingChanges}
+              >
+                <AlertTriangle className="h-4 w-4 mr-1" />
+                Atualizar Pendências
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  )}
-
-
-
+  );
+}

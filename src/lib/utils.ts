@@ -8,7 +8,7 @@ import {
   timelineEventTypeTranslations,
   processStatusColors,
 } from "@/constants/translate"
-import { type ClassValue, clsx } from "clsx"
+ import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -125,7 +125,7 @@ export const getRoleOperator = (role: string) => {
 
 // Função para traduzir status do processo
 export function translateProcessStatus(status: string) {
-  return processStatusTranslations[status] || status
+  return processStatusTranslations[status as keyof typeof processStatusTranslations] || status
 }
 
 // Função para traduzir tipo do processo
