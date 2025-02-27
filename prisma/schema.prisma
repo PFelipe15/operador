@@ -68,6 +68,7 @@ enum TimelineEventCategory {
   DOCUMENT @map("DOCUMENT")
   DATA     @map("DATA")
   ANALYSIS @map("ANALYSIS")
+  UPDATEFIELD  @map("UPDATEFIELD")
 }
 
 enum NotificationType {

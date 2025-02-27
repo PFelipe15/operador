@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { infoDataUpdate } from '@/constants/translate'
 
 export async function PATCH(
   request: Request,
@@ -70,9 +71,9 @@ export async function PATCH(
       data: {
         processId: params.id,
         title: 'Informação Atualizada',
-        description: `Campo "${field}" da empresa atualizado`,
+        description: `Campo "${ infoDataUpdate[field as keyof typeof infoDataUpdate] || field }" da empresa atualizado`,
         type: 'INFO',
-        category: 'DATA',
+        category: 'UPDATEFIELD',
         metadata: JSON.stringify({
           field,
           oldValue: process.company?.[field as keyof typeof process.company],
