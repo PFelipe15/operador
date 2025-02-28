@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from "react";
 import { Inter } from "next/font/google";
- import { ThemeProvider } from "@/components/themes/theme-provider";
+import { ThemeProvider } from "@/components/themes/theme-provider";
 import { cn } from "@/lib/utils";
 import "@/app/globals.css";
 import { Toaster } from "sonner";
@@ -15,7 +15,10 @@ interface LayoutProps {
 export const metadata: Metadata = {
   title: "STEP.MEI",
   description: "Sistema de gestão de abertura de MEI",
-}
+  icons: {
+    icon: "/figuras/logo.svg",
+  },
+};
 
 const RootLayout: FC<LayoutProps> = ({ children }) => {
   return (
@@ -29,7 +32,7 @@ const RootLayout: FC<LayoutProps> = ({ children }) => {
           enableSystem
           disableTransitionOnChange
         >
-          <div className="relative flex min-h-screen">
+          <div className="relative">
             <main className="flex-1 bg-emerald-100 dark:bg-emerald-950">
               {children}
             </main>

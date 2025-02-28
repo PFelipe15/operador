@@ -29,7 +29,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen flex">
       <div className='absolute top-12 left-12 w-full'> <ThemeToggle /> </div>
       {/* Coluna da Esquerda - Ilustração */}
       <div className="hidden lg:flex lg:w-1/2 bg-emerald-50 dark:bg-emerald-900 flex-col items-center justify-center p-12">
