@@ -18,6 +18,21 @@ export const metadata: Metadata = {
   icons: {
     icon: "/figuras/logo.svg",
   },
+  openGraph: {
+    title: "STEP.MEI",
+    description: "Sistema de gestão de abertura de MEI",
+    images: [
+      {
+        url: "/figuras/logo.jpg", // Ajuste para o caminho correto da sua imagem
+        width: 1200,
+        height: 630,
+        alt: "STEP.MEI Preview",
+      },
+    ],
+    type: "website",
+    locale: "pt_BR",
+    url: "https://operador-nu.vercel.app/", // Ajuste para sua URL
+  },
 };
 
 const RootLayout: FC<LayoutProps> = ({ children }) => {
