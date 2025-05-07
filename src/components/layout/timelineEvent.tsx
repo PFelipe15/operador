@@ -113,40 +113,7 @@ export function TimelineEvent({ event }: { event: TimelineEventPrisma }) {
 
               {event.category === "DATA" && event.metadata && (
                 <div className="flex flex-col space-y-2">
-                  <div className="flex items-center gap-3">
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "px-3 py-1 text-sm font-medium",
-                        getProcessStatusColor(
-                          JSON.parse(event.metadata || "{}")
-                            .previousStatus as ProcessStatus
-                        )
-                      )}
-                    >
-                      {processStatusTranslations[
-                        JSON.parse(event.metadata || "{}")
-                          .previousStatus as ProcessStatus
-                      ] || "Status anterior"}
-                    </Badge>
-
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
-
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "px-3 py-1 text-sm font-medium",
-                        getProcessStatusColor(
-                          JSON.parse(event.metadata || "{}").newStatus
-                        )
-                      )}
-                    >
-                      {processStatusTranslations[
-                        JSON.parse(event.metadata || "{}")
-                          .newStatus as ProcessStatus
-                      ] || "Novo status"}
-                    </Badge>
-                  </div>
+                  
 
                   {/* Exibe itens adicionados/removidos se existirem */}
                   {JSON.parse(event.metadata || "{}").addedItems?.length > 0 && (

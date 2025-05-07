@@ -41,7 +41,7 @@ export function AssignOperatorModal({
   useEffect(() => {
     const fetchOperators = async () => {
       try {
-        const response = await fetch('/api/operators')
+        const response = await fetch('/api/v1/operators')
         const data = await response.json()
         setOperators(data)
       } catch (error) {
@@ -63,7 +63,7 @@ export function AssignOperatorModal({
 
     setLoading(true)
     try {
-      const response = await fetch(`/api/processes/${processId}/assign`, {
+      const response = await fetch(`/api/v1/processes/${processId}/assign`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

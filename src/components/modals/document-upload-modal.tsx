@@ -62,7 +62,7 @@ export function DocumentUploadModal({ processId, onUploadSuccess, operatorProces
     formData.append('operatorId', operator?.id || '')
     formData.append('source', 'MANUAL')
      try {
-      const response = await fetch(`/api/processes/${processId}/documents`, {
+      const response = await fetch(`/api/v1/processes/${processId}/documents`, {
         method: 'POST',
         body: formData,
       })

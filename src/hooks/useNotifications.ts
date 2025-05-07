@@ -10,7 +10,7 @@ import { Notification } from '@prisma/client'
     error, 
     mutate 
   } = useSWR<Notification[]>(
-    operator?.id ? `/api/timeline/notifications/${operator.id}` : null,
+    operator?.id ? `/api/v1/timeline/notifications/${operator.id}` : null,
     async (url) => {
       const res = await fetch(url)
       const data = await res.json()
@@ -44,7 +44,7 @@ import { Notification } from '@prisma/client'
 
   const markAsRead = async (id: string) => {
     try {
-      await fetch(`/api/timeline/notifications/read/${id}`, {
+      await fetch(`/api/v1/timeline/notifications/read/${id}`, {
         method: 'PUT'
       })
       mutate() // Atualiza os dados
@@ -57,7 +57,7 @@ import { Notification } from '@prisma/client'
     if (!operator?.id) return
     
     try {
-      await fetch(`/api/timeline/notifications/read-all`, {
+      await fetch(`/api/v1/timeline/notifications/read-all`, {
         method: 'PUT',
         body: JSON.stringify({ operatorId: operator.id })
       })
@@ -69,7 +69,7 @@ import { Notification } from '@prisma/client'
 
   const deleteNotification = async (id: string) => {
     try {
-      await fetch(`/api/timeline/notifications/read/${id}`, {
+      await fetch(`/api/v1/timeline/notifications/read/${id}`, {
         method: 'DELETE'
       })
       mutate()

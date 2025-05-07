@@ -55,7 +55,7 @@ import { useEffect, useState } from "react";
 import { Bar, Doughnut, Pie } from "react-chartjs-2";
 
 interface DashboardStatsOperator {
-  rejectionReasons:   number;
+  rejectionReasons: number;
   documentRejectionRate: number;
   totalProcesses: number;
   activeProcesses: number;
@@ -199,10 +199,11 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchStats = async () => {
       if (!operator?.id) return;
-
+      const operatorId = operator?.id;
       try {
         setLoading(true);
-        const response = await fetch(`/api/dashboard/stats/${operator.id}`);
+        console.log(operatorId);
+        const response = await fetch(`/api/v1/dashboard/${operatorId}`);
         const data = await response.json();
 
         if (!response.ok) throw new Error(data.error);
@@ -220,7 +221,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="animate-spin bg-emerald-200 rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-700"></div>
       </div>
     );
   }
@@ -358,7 +359,8 @@ export default function DashboardPage() {
       <div className="min-h-screen    dark:from-gray-950 dark:to-gray-900  ">
         <div className="max-w-[1600px]   space-y-6">
           {/* Header */}
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm">
+
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-5 shadow-sm">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
@@ -373,7 +375,7 @@ export default function DashboardPage() {
                   <FileText className="w-4 h-4" />
                   Exportar Relatório
                 </Button>
-                <Button className="gap-2"   >
+                <Button className="gap-2">
                   <RefreshCw className="w-4 h-4" />
                   Atualizar Dados
                 </Button>
@@ -383,309 +385,108 @@ export default function DashboardPage() {
 
           {/* Tabs de Navegação */}
           <Tabs defaultValue="geral" className="w-full">
-            <TabsList className="grid grid-cols-4  ">
-              <TabsTrigger value="geral">Visão Geral</TabsTrigger>
-              <TabsTrigger value="processos">Processos</TabsTrigger>
-              <TabsTrigger value="documentos">Documentos</TabsTrigger>
-              <TabsTrigger value="operacional">Desempenho</TabsTrigger>
-            </TabsList>
-
-            {/* Tab: Visão Geral */}
-            <TabsContent value="geral" className="space-y-6">
-              {/* Métricas Principais */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <MetricCard
-                  title="Total de Processos"
-                  value={stats.totalProcesses}
-                  icon={<Files className="h-5 w-5 text-blue-500" />}
-                  description="Todos os processos no sistema"
-                />
-                <MetricCard
-                  title="Processos Ativos"
-                  value={stats.activeProcesses}
-                  icon={<Activity className="h-5 w-5 text-emerald-500" />}
-                  description="Processos em andamento"
-                />
-                <MetricCard
-                  title="Processos Concluídos"
-                  value={stats.completedProcesses}
-                  icon={<CheckCircle className="h-5 w-5 text-green-500" />}
-                  description="Processos aprovados"
-                />
-                <MetricCard
-                  title="Taxa de Conclusão"
-                  value={`${stats.processCompletionRate.toFixed(1)}%`}
-                  icon={<Activity className="h-5 w-5 text-indigo-500" />}
-                  description="Percentual de processos concluídos"
-                />
-              </div>
-
-              {/* Gráficos Principais */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Gráfico de Status */}
-                <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm">
-                  <div className="flex items-center gap-2 mb-6">
-                    <Filter className="h-5 w-5 text-gray-500" />
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-200">
-                      Distribuição de Status
-                    </h3>
+            <div className="bg-white dark:bg-gray-900 border-b">
+              <TabsList className="flex h-14 justify-start">
+                <TabsTrigger
+                  value="geral"
+                  className="group relative px-6 h-full border-b-2 border-transparent data-[state=active]:border-emerald-500"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-md bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                      <Activity className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300 group-data-[state=active]:text-emerald-600 dark:group-data-[state=active]:text-emerald-400">
+                      Visão Geral
+                    </span>
                   </div>
-                  <div className="h-[300px]">
-                    <Pie
-                      data={pieChartData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: "bottom",
-                            labels: {
-                              padding: 15,
-                              usePointStyle: true,
-                            },
-                          },
-                        },
-                      }}
-                    />
+                </TabsTrigger>
+
+                <TabsTrigger
+                  value="processos"
+                  className="group relative px-6 h-full border-b-2 border-transparent data-[state=active]:border-blue-500"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-md bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                      <Files className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300 group-data-[state=active]:text-blue-600 dark:group-data-[state=active]:text-blue-400">
+                      Processos
+                    </span>
                   </div>
+                </TabsTrigger>
+
+                <TabsTrigger
+                  value="documentos"
+                  className="group relative px-6 h-full border-b-2 border-transparent data-[state=active]:border-violet-500"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-md bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400">
+                      <FileText className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300 group-data-[state=active]:text-violet-600 dark:group-data-[state=active]:text-violet-400">
+                      Documentos
+                    </span>
+                  </div>
+                </TabsTrigger>
+
+                <TabsTrigger
+                  value="desempenho"
+                  className="group relative px-6 h-full border-b-2 border-transparent data-[state=active]:border-amber-500"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-md bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                      <BarChart3 className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300 group-data-[state=active]:text-amber-600 dark:group-data-[state=active]:text-amber-400">
+                      Desempenho
+                    </span>
+                  </div>
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            <div className="py-3">
+              <TabsContent value="geral" className="mt-0 space-y-6">
+                {/* Métricas Principais */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <MetricCard
+                    title="Total de Processos"
+                    value={stats.totalProcesses}
+                    icon={<Files className="h-5 w-5 text-blue-500" />}
+                    description="Todos os processos no sistema"
+                  />
+                  <MetricCard
+                    title="Processos Ativos"
+                    value={stats.activeProcesses}
+                    icon={<Activity className="h-5 w-5 text-emerald-500" />}
+                    description="Processos em andamento"
+                  />
+                  <MetricCard
+                    title="Processos Concluídos"
+                    value={stats.completedProcesses}
+                    icon={<CheckCircle className="h-5 w-5 text-green-500" />}
+                    description="Processos aprovados"
+                  />
+                  <MetricCard
+                    title="Taxa de Conclusão"
+                    value={`${stats.processCompletionRate.toFixed(1)}%`}
+                    icon={<Activity className="h-5 w-5 text-indigo-500" />}
+                    description="Percentual de processos concluídos"
+                  />
                 </div>
 
-                {/* Gráfico de Tipos de Processo */}
-                <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm">
-                  <div className="flex items-center gap-2 mb-6">
-                    <Files className="h-5 w-5 text-gray-500" />
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-200">
-                      Tipos de Processo
-                    </h3>
-                  </div>
-                  <div className="h-[300px]">
-                    <Bar
-                      data={processTypeData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            display: false,
-                          },
-                        },
-                        scales: {
-                          y: {
-                            beginAtZero: true,
-                            ticks: {
-                              precision: 0,
-                            },
-                          },
-                        },
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Métricas de Eficiência */}
-              <div className="mb-6">
-                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col gap-2">
-                        <span className="text-sm font-medium text-gray-500">
-                          Tempo Médio de Conclusão
-                        </span>
-                        <div className="flex items-end gap-2">
-                          <span className="text-3xl font-bold text-gray-800">
-                            {stats.averageCompletionTime.toFixed(1)}
-                          </span>
-                          <span className="text-gray-500 mb-1">dias</span>
-                        </div>
-                        <Progress 
-                          value={Math.min((7 / stats.averageCompletionTime) * 100, 100)} 
-                          className="h-2" 
-                        />
-                        <span className="text-sm text-gray-500">Meta: 7 dias</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col gap-2">
-                        <span className="text-sm font-medium text-gray-500">
-                          Taxa de Verificação
-                        </span>
-                        <div className="flex items-end gap-2">
-                          <span className="text-3xl font-bold text-gray-800">
-                            {stats?.documentVerificationRate?.toFixed(1)}%
-                          </span>
-                        </div>
-                        <Progress
-                          value={stats?.documentVerificationRate}
-                          className="h-2"
-                        />
-                        <span className="text-sm text-gray-500">Meta: 95%</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col gap-2">
-                        <span className="text-sm font-medium text-gray-500">
-                          Processos por Operador
-                        </span>
-                        <div className="flex items-end gap-2">
-                          <span className="text-3xl font-bold text-gray-800">
-                            {stats.processesPerOperator.toFixed(1)}
-                          </span>
-                        </div>
-                        <Progress 
-                          value={(stats.processesPerOperator / 15) * 100} 
-                          className="h-2" 
-                        />
-                        <span className="text-sm text-gray-500">
-                          Meta: 15 processos
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Tab: Processos */}
-            <TabsContent value="processos" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <MetricCard
-                  title="Processos Urgentes"
-                  value={stats.urgentProcesses}
-                  icon={<AlertCircle className="h-5 w-5 text-red-500" />}
-                  description="Prioridade alta"
-                  color="red"
-                />
-                <MetricCard
-                  title="Processos Parados"
-                  value={stats.staleProcesses}
-                  icon={<Clock className="h-5 w-5 text-yellow-500" />}
-                  description="Sem atividade recente"
-                  color="yellow"
-                />
-                <MetricCard
-                  title="Em Análise"
-                  value={stats.inProgressProcesses}
-                  icon={<BarChart3 className="h-5 w-5 text-blue-500" />}
-                  description="Processos em análise"
-                  color="blue"
-                />
-                <MetricCard
-                  title="Média de Documentos"
-                  value={stats.averageDocuments.toFixed(1)}
-                  icon={<FileText className="h-5 w-5 text-purple-500" />}
-                  description="Por processo"
-                  color="purple"
-                />
-              </div>
-
-              {/* Funil de Conversão */}
-              <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900 mb-6">
-                <CardHeader>
-                  <CardTitle>Funil de Conversão</CardTitle>
-                  <CardDescription>Progresso dos processos por etapa</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col gap-4">
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-sm">Criados</span>
-                        <span className="text-sm font-medium">{stats.totalProcesses || 0}</span>
-                      </div>
-                      <Progress value={100} className="h-2 bg-gray-200" />
+                {/* Gráficos Principais */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Gráfico de Status */}
+                  <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm">
+                    <div className="flex items-center gap-2 mb-6">
+                      <Filter className="h-5 w-5 text-gray-500" />
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+                        Distribuição de Status
+                      </h3>
                     </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-sm">Documentos Enviados</span>
-                        <span className="text-sm font-medium">
-                          {stats.processesByStatus?.find((s) => s.status === 'DOCS_SENT')?.count || 0}
-                        </span>
-                      </div>
-                      <Progress 
-                        value={stats.totalProcesses ? 
-                          ((stats.processesByStatus?.find((s) => s.status === 'DOCS_SENT')?.count || 0) / stats.totalProcesses) * 100 : 0} 
-                        className="h-2 bg-gray-200" 
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-sm">Em Análise</span>
-                        <span className="text-sm font-medium">
-                          {stats.processesByStatus?.find((s) => s.status === 'IN_ANALYSIS')?.count || 0}
-                        </span>
-                      </div>
-                      <Progress 
-                        value={stats.totalProcesses ? 
-                          ((stats.processesByStatus?.find((s) => s.status === 'IN_ANALYSIS')?.count || 0) / stats.totalProcesses) * 100 : 0} 
-                        className="h-2 bg-gray-200" 
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-sm">Aprovados</span>
-                        <span className="text-sm font-medium">
-                          {stats.processesByStatus?.find((s) => s.status === 'APPROVED')?.count || 0}
-                        </span>
-                      </div>
-                      <Progress 
-                        value={stats.totalProcesses ? 
-                          ((stats.processesByStatus?.find((s) => s.status === 'APPROVED')?.count || 0) / stats.totalProcesses) * 100 : 0} 
-                        className="h-2 bg-gray-200" 
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Gráficos de Processos */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Gráfico de Prioridades */}
-                <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm">
-                  <div className="flex items-center gap-2 mb-6">
-                    <AlertOctagon className="h-5 w-5 text-gray-500" />
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-200">
-                      Distribuição por Prioridade
-                    </h3>
-                  </div>
-                  <div className="h-[300px]">
-                    <Doughnut
-                      data={priorityData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: "bottom",
-                            labels: {
-                              padding: 15,
-                              usePointStyle: true,
-                            },
-                          },
-                        },
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Origem dos Processos */}
-                <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm">
-                  <div className="flex items-center gap-2 mb-6">
-                    <MessageSquare className="h-5 w-5 text-gray-500" />
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-200">
-                      Origem dos Processos
-                    </h3>
-                  </div>
-                  <div className="h-[300px]">
-                    {stats.sourceDistribution ? (
-                      <Doughnut
-                        data={stats.sourceDistribution}
+                    <div className="h-[300px]">
+                      <Pie
+                        data={pieChartData}
                         options={{
                           responsive: true,
                           maintainAspectRatio: false,
@@ -700,58 +501,282 @@ export default function DashboardPage() {
                           },
                         }}
                       />
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <p className="text-gray-500">Dados não disponíveis</p>
-                      </div>
-                    )}
+                    </div>
+                  </div>
+
+                  {/* Gráfico de Tipos de Processo */}
+                  <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm">
+                    <div className="flex items-center gap-2 mb-6">
+                      <Files className="h-5 w-5 text-gray-500" />
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+                        Tipos de Processo
+                      </h3>
+                    </div>
+                    <div className="h-[300px]">
+                      <Bar
+                        data={processTypeData}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: {
+                              display: false,
+                            },
+                          },
+                          scales: {
+                            y: {
+                              beginAtZero: true,
+                              ticks: {
+                                precision: 0,
+                              },
+                            },
+                          },
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </TabsContent>
 
-            {/* Tab: Documentos */}
-            <TabsContent value="documentos" className="space-y-6">
-              {/* Métricas de Documentos */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <MetricCard
-                  title="Total de Documentos"
-                  value={stats.totalDocuments || 0}
-                  icon={<FileText className="h-5 w-5 text-blue-500" />}
-                  description="Todos os documentos"
-                />
-                <MetricCard
-                  title="Taxa de Verificação"
-                  value={`${stats.documentVerificationRate?.toFixed(1) || 0}%`}
-                  icon={<CheckCircle className="h-5 w-5 text-green-500" />}
-                  description="Documentos verificados"
-                  color="green"
-                />
-                <MetricCard
-                  title="Taxa de Rejeição"
-                  value={`${stats.documentRejectionRate?.toFixed(1) || 0}%`}
-                  icon={<AlertCircle className="h-5 w-5 text-red-500" />}
-                  description="Documentos rejeitados"
-                  color="red"
-                />
-              </div>
+                {/* Métricas de Eficiência */}
+                <div className="mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900">
+                      <CardContent className="p-6">
+                        <div className="flex flex-col gap-2">
+                          <span className="text-sm font-medium text-gray-500">
+                            Tempo Médio de Conclusão
+                          </span>
+                          <div className="flex items-end gap-2">
+                            <span className="text-3xl font-bold text-gray-800">
+                              {stats.averageCompletionTime.toFixed(1)}
+                            </span>
+                            <span className="text-gray-500 mb-1">dias</span>
+                          </div>
+                          <Progress
+                            value={Math.min(
+                              (7 / stats.averageCompletionTime) * 100,
+                              100
+                            )}
+                            className="h-2"
+                          />
+                          <span className="text-sm text-gray-500">
+                            Meta: 7 dias
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              {/* Primeira linha de gráficos - lado a lado */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {/* Gráfico de Status dos Documentos */}
-                <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900">
+                    <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900">
+                      <CardContent className="p-6">
+                        <div className="flex flex-col gap-2">
+                          <span className="text-sm font-medium text-gray-500">
+                            Taxa de Verificação
+                          </span>
+                          <div className="flex items-end gap-2">
+                            <span className="text-3xl font-bold text-gray-800">
+                              {stats?.documentVerificationRate?.toFixed(1)}%
+                            </span>
+                          </div>
+                          <Progress
+                            value={stats?.documentVerificationRate}
+                            className="h-2"
+                          />
+                          <span className="text-sm text-gray-500">
+                            Meta: 95%
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900">
+                      <CardContent className="p-6">
+                        <div className="flex flex-col gap-2">
+                          <span className="text-sm font-medium text-gray-500">
+                            Processos por Operador
+                          </span>
+                          <div className="flex items-end gap-2">
+                            <span className="text-3xl font-bold text-gray-800">
+                              {stats.processesPerOperator.toFixed(1)}
+                            </span>
+                          </div>
+                          <Progress
+                            value={(stats.processesPerOperator / 15) * 100}
+                            className="h-2"
+                          />
+                          <span className="text-sm text-gray-500">
+                            Meta: 15 processos
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Tab: Processos */}
+              <TabsContent value="processos" className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <MetricCard
+                    title="Processos Urgentes"
+                    value={stats.urgentProcesses}
+                    icon={<AlertCircle className="h-5 w-5 text-red-500" />}
+                    description="Prioridade alta"
+                    color="red"
+                  />
+                  <MetricCard
+                    title="Processos Parados"
+                    value={stats.staleProcesses}
+                    icon={<Clock className="h-5 w-5 text-yellow-500" />}
+                    description="Sem atividade recente"
+                    color="yellow"
+                  />
+                  <MetricCard
+                    title="Em Análise"
+                    value={stats.inProgressProcesses}
+                    icon={<BarChart3 className="h-5 w-5 text-blue-500" />}
+                    description="Processos em análise"
+                    color="blue"
+                  />
+                  <MetricCard
+                    title="Média de Documentos"
+                    value={stats.averageDocuments.toFixed(1)}
+                    icon={<FileText className="h-5 w-5 text-purple-500" />}
+                    description="Por processo"
+                    color="purple"
+                  />
+                </div>
+
+                {/* Funil de Conversão */}
+                <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900 mb-6">
                   <CardHeader>
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-gray-500" />
-                      <CardTitle>Status dos Documentos</CardTitle>
-                    </div>
-                    <CardDescription>Distribuição por status atual</CardDescription>
+                    <CardTitle>Funil de Conversão</CardTitle>
+                    <CardDescription>
+                      Progresso dos processos por etapa
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
+                    <div className="flex flex-col gap-4">
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-sm">Criados</span>
+                          <span className="text-sm font-medium">
+                            {stats.totalProcesses || 0}
+                          </span>
+                        </div>
+                        <Progress value={100} className="h-2 bg-gray-200" />
+                      </div>
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-sm">Documentos Enviados</span>
+                          <span className="text-sm font-medium">
+                            {stats.processesByStatus?.find(
+                              (s) => s.status === "DOCS_SENT"
+                            )?.count || 0}
+                          </span>
+                        </div>
+                        <Progress
+                          value={
+                            stats.totalProcesses
+                              ? ((stats.processesByStatus?.find(
+                                  (s) => s.status === "DOCS_SENT"
+                                )?.count || 0) /
+                                  stats.totalProcesses) *
+                                100
+                              : 0
+                          }
+                          className="h-2 bg-gray-200"
+                        />
+                      </div>
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-sm">Em Análise</span>
+                          <span className="text-sm font-medium">
+                            {stats.processesByStatus?.find(
+                              (s) => s.status === "IN_ANALYSIS"
+                            )?.count || 0}
+                          </span>
+                        </div>
+                        <Progress
+                          value={
+                            stats.totalProcesses
+                              ? ((stats.processesByStatus?.find(
+                                  (s) => s.status === "IN_ANALYSIS"
+                                )?.count || 0) /
+                                  stats.totalProcesses) *
+                                100
+                              : 0
+                          }
+                          className="h-2 bg-gray-200"
+                        />
+                      </div>
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-sm">Aprovados</span>
+                          <span className="text-sm font-medium">
+                            {stats.processesByStatus?.find(
+                              (s) => s.status === "APPROVED"
+                            )?.count || 0}
+                          </span>
+                        </div>
+                        <Progress
+                          value={
+                            stats.totalProcesses
+                              ? ((stats.processesByStatus?.find(
+                                  (s) => s.status === "APPROVED"
+                                )?.count || 0) /
+                                  stats.totalProcesses) *
+                                100
+                              : 0
+                          }
+                          className="h-2 bg-gray-200"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Gráficos de Processos */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Gráfico de Prioridades */}
+                  <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm">
+                    <div className="flex items-center gap-2 mb-6">
+                      <AlertOctagon className="h-5 w-5 text-gray-500" />
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+                        Distribuição por Prioridade
+                      </h3>
+                    </div>
                     <div className="h-[300px]">
-                      {stats.documentStatusData ? (
+                      <Doughnut
+                        data={priorityData}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: {
+                              position: "bottom",
+                              labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                              },
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Origem dos Processos */}
+                  <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm">
+                    <div className="flex items-center gap-2 mb-6">
+                      <MessageSquare className="h-5 w-5 text-gray-500" />
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+                        Origem dos Processos
+                      </h3>
+                    </div>
+                    <div className="h-[300px]">
+                      {stats.sourceDistribution ? (
                         <Doughnut
-                          data={stats.documentStatusData}
+                          data={stats.sourceDistribution}
                           options={{
                             responsive: true,
                             maintainAspectRatio: false,
@@ -759,22 +784,10 @@ export default function DashboardPage() {
                               legend: {
                                 position: "bottom",
                                 labels: {
-                                  padding: 10,
+                                  padding: 15,
                                   usePointStyle: true,
-                                  boxWidth: 10
                                 },
                               },
-                              tooltip: {
-                                callbacks: {
-                                  label: function(context) {
-                                    const label = context.label || '';
-                                    const value = Number(context.raw) || 0;
-                                    const total = context.dataset.data.reduce((a: number, b: number) => (a + b), 0);
-                                    const percentage = Math.round((value / total) * 100);
-                                    return `${label}: ${value} (${percentage}%)`;
-                                  }
-                                }
-                              }
                             },
                           }}
                         />
@@ -784,149 +797,256 @@ export default function DashboardPage() {
                         </div>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
+              </TabsContent>
 
-                {/* Taxa de Verificação por Tipo */}
-                <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900">
-                  <CardHeader>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                      <CardTitle>Taxa de Verificação por Tipo</CardTitle>
-                    </div>
-                    <CardDescription>Percentual de documentos verificados por categoria</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[300px]">
-                      {stats.documentVerificationByType ? (
-                        <Bar
-                          data={stats.documentVerificationByType}
-                          options={{
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            indexAxis: 'y',
-                            plugins: {
-                              legend: { display: false }
-                            },
-                            scales: {
-                              x: {
-                                beginAtZero: true,
-                                max: 100,
-                                ticks: {
-                                  callback: function(value) {
-                                    return value + '%';
-                                  }
-                                }
-                              }
-                            }
-                          }}
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <p className="text-gray-500">Dados não disponíveis</p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+              {/* Tab: Documentos */}
+              <TabsContent value="documentos" className="space-y-6">
+                {/* Métricas de Documentos */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <MetricCard
+                    title="Total de Documentos"
+                    value={stats.totalDocuments || 0}
+                    icon={<FileText className="h-5 w-5 text-blue-500" />}
+                    description="Todos os documentos"
+                  />
+                  <MetricCard
+                    title="Taxa de Verificação"
+                    value={`${
+                      stats.documentVerificationRate?.toFixed(1) || 0
+                    }%`}
+                    icon={<CheckCircle className="h-5 w-5 text-green-500" />}
+                    description="Documentos verificados"
+                    color="green"
+                  />
+                  <MetricCard
+                    title="Taxa de Rejeição"
+                    value={`${stats.documentRejectionRate?.toFixed(1) || 0}%`}
+                    icon={<AlertCircle className="h-5 w-5 text-red-500" />}
+                    description="Documentos rejeitados"
+                    color="red"
+                  />
+                </div>
 
-              {/* Segunda linha de gráficos - lado a lado */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Motivos de Rejeição */}
-                <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900">
-                  <CardHeader>
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="h-5 w-5 text-red-500" />
-                      <CardTitle>Motivos de Rejeição</CardTitle>
-                    </div>
-                    <CardDescription>Principais razões para rejeição de documentos</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[300px]">
-                      {stats.rejectionReasons ? (
-                        <Bar
-                          data={{
-                            labels: Array.isArray(stats.rejectionReasons) 
-                              ? stats.rejectionReasons.map(item => item.label)
-                              : [],
-                            datasets: [{
-                              label: 'Motivos de Rejeição',
-                              data: Array.isArray(stats.rejectionReasons) 
-                                ? stats.rejectionReasons.map(item => item.value)
+                {/* Primeira linha de gráficos - lado a lado */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  {/* Gráfico de Status dos Documentos */}
+                  <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900">
+                    <CardHeader>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-gray-500" />
+                        <CardTitle>Status dos Documentos</CardTitle>
+                      </div>
+                      <CardDescription>
+                        Distribuição por status atual
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-[300px]">
+                        {stats.documentStatusData ? (
+                          <Doughnut
+                            data={stats.documentStatusData}
+                            options={{
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              plugins: {
+                                legend: {
+                                  position: "bottom",
+                                  labels: {
+                                    padding: 10,
+                                    usePointStyle: true,
+                                    boxWidth: 10,
+                                  },
+                                },
+                                tooltip: {
+                                  callbacks: {
+                                    label: function (context) {
+                                      const label = context.label || "";
+                                      const value = Number(context.raw) || 0;
+                                      const total = context.dataset.data.reduce(
+                                        (a: number, b: number) => a + b,
+                                        0
+                                      );
+                                      const percentage = Math.round(
+                                        (value / total) * 100
+                                      );
+                                      return `${label}: ${value} (${percentage}%)`;
+                                    },
+                                  },
+                                },
+                              },
+                            }}
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <p className="text-gray-500">
+                              Dados não disponíveis
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Taxa de Verificação por Tipo */}
+                  <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900">
+                    <CardHeader>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <CardTitle>Taxa de Verificação por Tipo</CardTitle>
+                      </div>
+                      <CardDescription>
+                        Percentual de documentos verificados por categoria
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-[300px]">
+                        {stats.documentVerificationByType ? (
+                          <Bar
+                            data={stats.documentVerificationByType}
+                            options={{
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              indexAxis: "y",
+                              plugins: {
+                                legend: { display: false },
+                              },
+                              scales: {
+                                x: {
+                                  beginAtZero: true,
+                                  max: 100,
+                                  ticks: {
+                                    callback: function (value) {
+                                      return value + "%";
+                                    },
+                                  },
+                                },
+                              },
+                            }}
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <p className="text-gray-500">
+                              Dados não disponíveis
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Segunda linha de gráficos - lado a lado */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Motivos de Rejeição */}
+                  <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900">
+                    <CardHeader>
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="h-5 w-5 text-red-500" />
+                        <CardTitle>Motivos de Rejeição</CardTitle>
+                      </div>
+                      <CardDescription>
+                        Principais razões para rejeição de documentos
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-[300px]">
+                        {stats.rejectionReasons ? (
+                          <Bar
+                            data={{
+                              labels: Array.isArray(stats.rejectionReasons)
+                                ? stats.rejectionReasons.map(
+                                    (item) => item.label
+                                  )
                                 : [],
-                              backgroundColor: 'rgba(53, 162, 235, 0.5)',
-                            }]
-                          }}
-                          options={{
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                              legend: { display: false }
-                            },
-                            scales: {
-                              y: {
-                                beginAtZero: true,
-                                ticks: {
-                                  precision: 0
-                                }
-                              }
-                            }
-                          }}
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <p className="text-gray-500">Dados não disponíveis</p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                              datasets: [
+                                {
+                                  label: "Motivos de Rejeição",
+                                  data: Array.isArray(stats.rejectionReasons)
+                                    ? stats.rejectionReasons.map(
+                                        (item) => item.value
+                                      )
+                                    : [],
+                                  backgroundColor: "rgba(53, 162, 235, 0.5)",
+                                },
+                              ],
+                            }}
+                            options={{
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              plugins: {
+                                legend: { display: false },
+                              },
+                              scales: {
+                                y: {
+                                  beginAtZero: true,
+                                  ticks: {
+                                    precision: 0,
+                                  },
+                                },
+                              },
+                            }}
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <p className="text-gray-500">
+                              Dados não disponíveis
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                {/* Tempo de Processamento de Documentos */}
-                <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900">
-                  <CardHeader>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-5 w-5 text-blue-500" />
-                      <CardTitle>Tempo de Processamento</CardTitle>
-                    </div>
-                    <CardDescription>Tempo médio para verificação por tipo de documento</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[300px]">
-                      {stats.documentProcessingTime ? (
-                        <Bar
-                          data={stats.documentProcessingTime}
-                          options={{
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                              legend: { display: false }
-                            },
-                            scales: {
-                              y: {
-                                beginAtZero: true,
-                                title: {
-                                  display: true,
-                                  text: 'Horas'
-                                }
-                              }
-                            }
-                          }}
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <p className="text-gray-500">Dados não disponíveis</p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
+                  {/* Tempo de Processamento de Documentos */}
+                  <Card className="shadow-sm hover:shadow-md transition-all dark:bg-gray-900">
+                    <CardHeader>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-5 w-5 text-blue-500" />
+                        <CardTitle>Tempo de Processamento</CardTitle>
+                      </div>
+                      <CardDescription>
+                        Tempo médio para verificação por tipo de documento
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-[300px]">
+                        {stats.documentProcessingTime ? (
+                          <Bar
+                            data={stats.documentProcessingTime}
+                            options={{
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              plugins: {
+                                legend: { display: false },
+                              },
+                              scales: {
+                                y: {
+                                  beginAtZero: true,
+                                  title: {
+                                    display: true,
+                                    text: "Horas",
+                                  },
+                                },
+                              },
+                            }}
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <p className="text-gray-500">
+                              Dados não disponíveis
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </div>{" "}
             {/* Tab: Desempenho */}
-            <TabsContent value="operacional" className="space-y-6">
+            <TabsContent value="desempenho" className="space-y-6">
               {/* Métricas de Desempenho */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <MetricCard
@@ -961,7 +1081,9 @@ export default function DashboardPage() {
                         <Users className="h-5 w-5 text-blue-500" />
                         <CardTitle>Performance dos Operadores</CardTitle>
                       </div>
-                      <CardDescription>Taxa de sucesso por operador</CardDescription>
+                      <CardDescription>
+                        Taxa de sucesso por operador
+                      </CardDescription>
                     </div>
                     <Button variant="outline" size="sm" className="h-8 gap-1">
                       <Download className="h-4 w-4" />
@@ -977,7 +1099,7 @@ export default function DashboardPage() {
                             responsive: true,
                             maintainAspectRatio: false,
                             plugins: {
-                              legend: { display: false }
+                              legend: { display: false },
                             },
                             scales: {
                               y: {
@@ -985,15 +1107,15 @@ export default function DashboardPage() {
                                 max: 100,
                                 title: {
                                   display: true,
-                                  text: 'Taxa de Sucesso (%)'
+                                  text: "Taxa de Sucesso (%)",
                                 },
                                 ticks: {
-                                  callback: function(value) {
-                                    return value + '%';
-                                  }
-                                }
-                              }
-                            }
+                                  callback: function (value) {
+                                    return value + "%";
+                                  },
+                                },
+                              },
+                            },
                           }}
                         />
                       ) : (
@@ -1013,7 +1135,9 @@ export default function DashboardPage() {
                         <Activity className="h-5 w-5 text-indigo-500" />
                         <CardTitle>Carga de Trabalho</CardTitle>
                       </div>
-                      <CardDescription>Processos ativos por operador</CardDescription>
+                      <CardDescription>
+                        Processos ativos por operador
+                      </CardDescription>
                     </div>
                     <Select defaultValue="active">
                       <SelectTrigger className="w-[130px] h-8">
@@ -1035,20 +1159,20 @@ export default function DashboardPage() {
                             responsive: true,
                             maintainAspectRatio: false,
                             plugins: {
-                              legend: { display: false }
+                              legend: { display: false },
                             },
                             scales: {
                               y: {
                                 beginAtZero: true,
                                 title: {
                                   display: true,
-                                  text: 'Número de Processos'
+                                  text: "Número de Processos",
                                 },
                                 ticks: {
-                                  precision: 0
-                                }
-                              }
-                            }
+                                  precision: 0,
+                                },
+                              },
+                            },
                           }}
                         />
                       ) : (
@@ -1070,18 +1194,27 @@ export default function DashboardPage() {
                       <Clock className="h-5 w-5 text-yellow-500" />
                       <CardTitle>Tempo de Resposta</CardTitle>
                     </div>
-                    <CardDescription>Média de tempo para primeira ação</CardDescription>
+                    <CardDescription>
+                      Média de tempo para primeira ação
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-6">
                       <div className="flex flex-col gap-2">
                         <div className="flex justify-between">
-                          <span className="text-sm font-medium">Documentos</span>
-                          <span className="text-sm">{stats.responseTime?.documents || 0} horas</span>
+                          <span className="text-sm font-medium">
+                            Documentos
+                          </span>
+                          <span className="text-sm">
+                            {stats.responseTime?.documents || 0} horas
+                          </span>
                         </div>
-                        <Progress 
-                          value={Math.min((stats.responseTime?.documents || 0) / 24 * 100, 100)} 
-                          className="h-2" 
+                        <Progress
+                          value={Math.min(
+                            ((stats.responseTime?.documents || 0) / 24) * 100,
+                            100
+                          )}
+                          className="h-2"
                         />
                         <div className="flex justify-between text-xs text-gray-500">
                           <span>0h</span>
@@ -1089,26 +1222,36 @@ export default function DashboardPage() {
                           <span>24h+</span>
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-col gap-2">
                         <div className="flex justify-between">
                           <span className="text-sm font-medium">Análise</span>
-                          <span className="text-sm">{stats.responseTime?.analysis || 0} horas</span>
+                          <span className="text-sm">
+                            {stats.responseTime?.analysis || 0} horas
+                          </span>
                         </div>
-                        <Progress 
-                          value={Math.min((stats.responseTime?.analysis || 0) / 24 * 100, 100)} 
-                          className="h-2" 
+                        <Progress
+                          value={Math.min(
+                            ((stats.responseTime?.analysis || 0) / 24) * 100,
+                            100
+                          )}
+                          className="h-2"
                         />
                       </div>
-                      
+
                       <div className="flex flex-col gap-2">
                         <div className="flex justify-between">
                           <span className="text-sm font-medium">Aprovação</span>
-                          <span className="text-sm">{stats.responseTime?.approval || 0} horas</span>
+                          <span className="text-sm">
+                            {stats.responseTime?.approval || 0} horas
+                          </span>
                         </div>
-                        <Progress 
-                          value={Math.min((stats.responseTime?.approval || 0) / 24 * 100, 100)} 
-                          className="h-2" 
+                        <Progress
+                          value={Math.min(
+                            ((stats.responseTime?.approval || 0) / 24) * 100,
+                            100
+                          )}
+                          className="h-2"
                         />
                       </div>
                     </div>

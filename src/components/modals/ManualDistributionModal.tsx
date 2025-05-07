@@ -61,7 +61,7 @@ export function ManualDistributionModal({ onDistributionComplete }: { onDistribu
 
   const fetchPendingProcesses = async () => {
     try {
-      const response = await fetch("/api/processes?status=PENDING")
+      const response = await fetch("/api/v1/processes?status=PENDING")
       const data = await response.json()
       setProcesses(data)
     } catch (error) {
@@ -72,7 +72,7 @@ export function ManualDistributionModal({ onDistributionComplete }: { onDistribu
 
   const fetchAvailableOperators = async () => {
     try {
-      const response = await fetch("/api/operators")
+      const response = await fetch("/api/v1/operators")
       const data = await response.json()
       setOperators(data)
     } catch (error) {
@@ -92,7 +92,7 @@ export function ManualDistributionModal({ onDistributionComplete }: { onDistribu
 
     setLoading(true)
     try {
-      const response = await fetch("/api/distribution", {
+      const response = await fetch("/api/v1/distribution", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

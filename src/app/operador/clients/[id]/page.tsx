@@ -52,7 +52,7 @@ const ClientDetails: FC = () => {
   useEffect(() => {
     const fetchClient = async () => {
       try {
-        const response = await fetch(`/api/clients/${params.id}`)
+        const response = await fetch(`/api/v1/clients/${params.id}`)
         const data = await response.json()
         setClient(data)
       } catch (error) {

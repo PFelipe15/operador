@@ -8,7 +8,7 @@ import {
   timelineEventTypeTranslations,
   processStatusColors,
 } from "@/constants/translate"
- import { type ClassValue, clsx } from "clsx"
+import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -91,8 +91,6 @@ export function formatPriority(priority: string) {
   
   return priorityMap[priority] || priority
 }
-
-
 
 export function getPriorityColor(priority: string) {
   const priorityColors = {
@@ -189,7 +187,6 @@ export function getStatusIcon(status: string) {
   return icons[status as keyof typeof icons] || "ℹ️"
 }
 
-
 // Função auxiliar para formatação de tempo relativo
 export function formatTimeAgo(date: Date) {
   const now = new Date();
@@ -209,7 +206,6 @@ export function formatTime(minutes: number): string {
   const remainingMinutes = minutes % 60;
   return `${hours}h${remainingMinutes}min`;
 }
-
 
 // função helper no início do arquivo
 export const formatTimeDifference = (startDate: Date, endDate: Date) => {

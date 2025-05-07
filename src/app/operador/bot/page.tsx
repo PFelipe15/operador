@@ -1,77 +1,102 @@
-'use client'
+"use client";
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { AlertCircle, BarChart2, Bot, Clock, MessageSquare, Phone, Plus, RefreshCw, Smartphone, Users } from 'lucide-react'
-import Image from 'next/image'
-import QRCode from 'qrcode'
-import { useEffect, useState } from 'react'
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import {
+  AlertCircle,
+  BarChart2,
+  Bot,
+  Clock,
+  MessageSquare,
+  Phone,
+  Plus,
+  RefreshCw,
+  Smartphone,
+  Users,
+} from "lucide-react";
+import Image from "next/image";
+import QRCode from "qrcode";
+import { useEffect, useState } from "react";
 
 interface BotData {
-  qrcode: string | null
-  hasConnected: boolean
-  status: string
-  lastConnection: string | null
-  phoneNumber: string | null
-  batteryLevel: number | null
-  isOnline: boolean
-  errorMessage: string | null
-  messageCount: number
-  activeChats: number
-  responseRate: number
-  averageResponseTime: number
+  qrcode: string | null;
+  hasConnected: boolean;
+  status: string;
+  lastConnection: string | null;
+  phoneNumber: string | null;
+  batteryLevel: number | null;
+  isOnline: boolean;
+  errorMessage: string | null;
+  messageCount: number;
+  activeChats: number;
+  responseRate: number;
+  averageResponseTime: number;
 }
 
 export default function BotPage() {
-  const [bot, setBot] = useState<BotData | null>(null)
-  const [qrCodeImage, setQrCodeImage] = useState<string>('')
-  const [loading, setLoading] = useState(true)
-  const [isCreating, setIsCreating] = useState(false)
+  const [bot, setBot] = useState<BotData | null>(null);
+  const [qrCodeImage, setQrCodeImage] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     const fetchBot = async () => {
       try {
-        const response = await fetch('/api/bot')
-        const data = await response.json()
-        setBot(data)
-        
+        const response = await fetch("/api/v1/bot");
+        const data = await response.json();
+        setBot(data);
+
         if (data?.qrcode) {
-          const qrImage = await QRCode.toDataURL(data.qrcode)
-          setQrCodeImage(qrImage)
+          try {
+            const qrImage = await QRCode.toDataURL(data.qrcode);
+            setQrCodeImage(qrImage);
+          } catch (error) {
+            console.error("Erro ao gerar QR code:", error);
+          }
         }
       } catch (error) {
-        console.error('Erro ao buscar dados do bot:', error)
+        console.error("Erro ao buscar dados do bot:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchBot()
-    const interval = setInterval(fetchBot, 5000)
-    return () => clearInterval(interval)
-  }, [])
+    fetchBot();
 
-  
+    // Atualiza mais frequentemente quando está aguardando conexão
+    const interval = setInterval(
+      fetchBot,
+      bot?.status === "AGUARDANDO_CONEXAO" ? 2000 : 5000
+    );
+
+    return () => clearInterval(interval);
+  }, [bot?.status]);
 
   const handleCreateBot = async () => {
-    setIsCreating(true)
+    setIsCreating(true);
     try {
-      const response = await fetch('/api/bot', {
-        method: 'POST',
-      })
+      const response = await fetch("/api/bot", {
+        method: "POST",
+      });
       if (response.ok) {
         // Atualiza os dados após criar o bot
-        const data = await response.json()
-        setBot(data)
+        const data = await response.json();
+        setBot(data);
       }
     } catch (error) {
-      console.error('Erro ao criar bot:', error)
+      console.error("Erro ao criar bot:", error);
     } finally {
-      setIsCreating(false)
+      setIsCreating(false);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -84,11 +109,13 @@ export default function BotPage() {
 
           <div className="flex flex-col items-center justify-center p-12">
             <RefreshCw className="w-10 h-10 animate-spin text-green-600" />
-            <p className="mt-4 text-gray-600 font-medium">Carregando configurações do bot...</p>
+            <p className="mt-4 text-gray-600 font-medium">
+              Carregando configurações do bot...
+            </p>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!bot) {
@@ -104,15 +131,17 @@ export default function BotPage() {
             <CardHeader className="space-y-6 pb-0">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-2xl text-gray-800">Configuração do Bot WhatsApp</CardTitle>
+                  <CardTitle className="text-2xl text-gray-800">
+                    Configuração do Bot WhatsApp
+                  </CardTitle>
                   <CardDescription className="text-base mt-2">
                     Configure seu primeiro bot para automatizar o atendimento
                   </CardDescription>
                 </div>
-                <Image 
-                  src="/figuras/bot.svg" 
-                  alt="Bot WhatsApp" 
-                  width={120} 
+                <Image
+                  src="/figuras/bot.svg"
+                  alt="Bot WhatsApp"
+                  width={120}
                   height={120}
                   className="animate-float"
                 />
@@ -126,7 +155,9 @@ export default function BotPage() {
                     Importante
                   </h3>
                   <p className="text-blue-700 mb-4">
-                    Após criar o bot, nossa equipe técnica entrará em contato para auxiliar na configuração e ativação do seu WhatsApp Business.
+                    Após criar o bot, nossa equipe técnica entrará em contato
+                    para auxiliar na configuração e ativação do seu WhatsApp
+                    Business.
                   </p>
                   <ul className="space-y-2 text-blue-700">
                     <li className="flex items-center gap-2">
@@ -151,12 +182,27 @@ export default function BotPage() {
                   </h3>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
-                      { icon: "🔄", text: "Ao criar o bot, você receberá um QR Code" },
-                      { icon: "📱", text: "Escaneie o QR Code com seu WhatsApp" },
-                      { icon: "✅", text: "O bot estará pronto para uso após a conexão" },
-                      { icon: "💬", text: "Gerencie todas as conversas através desta interface" }
+                      {
+                        icon: "🔄",
+                        text: "Ao criar o bot, você receberá um QR Code",
+                      },
+                      {
+                        icon: "📱",
+                        text: "Escaneie o QR Code com seu WhatsApp",
+                      },
+                      {
+                        icon: "✅",
+                        text: "O bot estará pronto para uso após a conexão",
+                      },
+                      {
+                        icon: "💬",
+                        text: "Gerencie todas as conversas através desta interface",
+                      },
                     ].map((item, index) => (
-                      <li key={index} className="flex items-start gap-3 text-gray-600">
+                      <li
+                        key={index}
+                        className="flex items-start gap-3 text-gray-600"
+                      >
                         <span className="text-xl">{item.icon}</span>
                         <span>{item.text}</span>
                       </li>
@@ -185,7 +231,7 @@ export default function BotPage() {
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
   if (bot?.status === "NOT_CREATED") {
@@ -201,15 +247,17 @@ export default function BotPage() {
             <CardHeader className="space-y-6 pb-0">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-2xl text-gray-800">Bot em Configuração</CardTitle>
+                  <CardTitle className="text-2xl text-gray-800">
+                    Bot em Configuração
+                  </CardTitle>
                   <CardDescription className="text-base mt-2">
                     Aguardando ativação pela equipe STEP.MEI
                   </CardDescription>
                 </div>
-                <Image 
-                  src="/figuras/bot.svg" 
-                  alt="Bot WhatsApp" 
-                  width={120} 
+                <Image
+                  src="/figuras/bot.svg"
+                  alt="Bot WhatsApp"
+                  width={120}
                   height={120}
                   className="animate-float"
                 />
@@ -228,8 +276,13 @@ export default function BotPage() {
                         1
                       </div>
                       <div>
-                        <p className="font-medium text-blue-800">Contato da Equipe</p>
-                        <p className="text-blue-600">Nossa equipe entrará em contato para configurar seu WhatsApp Business</p>
+                        <p className="font-medium text-blue-800">
+                          Contato da Equipe
+                        </p>
+                        <p className="text-blue-600">
+                          Nossa equipe entrará em contato para configurar seu
+                          WhatsApp Business
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -237,8 +290,13 @@ export default function BotPage() {
                         2
                       </div>
                       <div>
-                        <p className="font-medium text-blue-800">Configuração Segura</p>
-                        <p className="text-blue-600">Auxílio na configuração do WhatsApp Business de forma segura</p>
+                        <p className="font-medium text-blue-800">
+                          Configuração Segura
+                        </p>
+                        <p className="text-blue-600">
+                          Auxílio na configuração do WhatsApp Business de forma
+                          segura
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -246,8 +304,13 @@ export default function BotPage() {
                         3
                       </div>
                       <div>
-                        <p className="font-medium text-blue-800">Ativação do Bot</p>
-                        <p className="text-blue-600">Configuração das respostas automáticas e fluxos de atendimento</p>
+                        <p className="font-medium text-blue-800">
+                          Ativação do Bot
+                        </p>
+                        <p className="text-blue-600">
+                          Configuração das respostas automáticas e fluxos de
+                          atendimento
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -278,7 +341,9 @@ export default function BotPage() {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-lg font-medium mb-1">Precisa de ajuda?</h3>
+                        <h3 className="text-lg font-medium mb-1">
+                          Precisa de ajuda?
+                        </h3>
                         <p className="text-green-50">
                           Entre em contato com nosso suporte
                         </p>
@@ -294,23 +359,77 @@ export default function BotPage() {
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
-  if(bot.status === "AGUARDANDO_CONEXAO"){
-    return(
+  if (bot.status === "AGUARDANDO_CONEXAO") {
+    return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-white p-6">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
             <Bot className="w-6 h-6 text-green-600" />
             Gerenciamento do Bot WhatsApp
           </h1>
-          <p className="text-gray-600 mt-1">Aguardando conexão com o WhatsApp Business</p>
+
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader className="space-y-6 pb-0">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-2xl text-gray-800">
+                    Conecte seu WhatsApp
+                  </CardTitle>
+                  <CardDescription className="text-base mt-2">
+                    Escaneie o QR Code para começar a usar o bot
+                  </CardDescription>
+                </div>
+                <Image
+                  src="/figuras/bot.svg"
+                  alt="Bot WhatsApp"
+                  width={120}
+                  height={120}
+                  className="animate-float"
+                />
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              {bot.qrcode ? (
+                <div className="space-y-6">
+                  <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                    <h3 className="font-medium text-yellow-800 mb-2">
+                      Como conectar:
+                    </h3>
+                    <ol className="space-y-2 text-yellow-700 ml-4 list-decimal">
+                      <li>Abra o WhatsApp no seu celular</li>
+                      <li>Acesse Configurações/Aparelhos Conectados</li>
+                      <li>Toque em &ldquo;Conectar um aparelho&rdquo;</li>
+                      <li>Aponte a câmera para o QR Code abaixo</li>
+                    </ol>
+                  </div>
+                  <div className="flex justify-center">
+                    <div className="bg-white p-4 rounded-xl shadow-md">
+                      <Image
+                        src={qrCodeImage}
+                        alt="QR Code do WhatsApp"
+                        width={280}
+                        height={280}
+                        className="rounded-lg"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-8">
+                  <RefreshCw className="w-10 h-10 animate-spin text-green-600" />
+                  <p className="mt-4 text-gray-600">Gerando QR Code...</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
-    )
+    );
   }
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-white p-6">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -320,9 +439,11 @@ export default function BotPage() {
               <Bot className="w-6 h-6 text-green-600" />
               Gerenciamento do Bot WhatsApp
             </h1>
-            <p className="text-gray-600 mt-1">Monitore e gerencie seu assistente virtual</p>
+            <p className="text-gray-600 mt-1">
+              Monitore e gerencie seu assistente virtual
+            </p>
           </div>
-          
+
           <Button
             onClick={() => window.location.reload()}
             variant="outline"
@@ -340,15 +461,17 @@ export default function BotPage() {
               <CardHeader className="space-y-6 pb-0">
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-2xl text-gray-800">Conecte seu WhatsApp</CardTitle>
+                    <CardTitle className="text-2xl text-gray-800">
+                      Conecte seu WhatsApp
+                    </CardTitle>
                     <CardDescription className="text-base mt-2">
                       Escaneie o QR Code para começar a usar o bot
                     </CardDescription>
                   </div>
-                  <Image 
-                    src="/figuras/bot.svg" 
-                    alt="Bot WhatsApp" 
-                    width={120} 
+                  <Image
+                    src="/figuras/bot.svg"
+                    alt="Bot WhatsApp"
+                    width={120}
                     height={120}
                     className="animate-float"
                   />
@@ -358,7 +481,9 @@ export default function BotPage() {
                 {qrCodeImage && (
                   <div className="space-y-6">
                     <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
-                      <h3 className="font-medium text-yellow-800 mb-2">Como conectar:</h3>
+                      <h3 className="font-medium text-yellow-800 mb-2">
+                        Como conectar:
+                      </h3>
                       <ol className="space-y-2 text-yellow-700 ml-4 list-decimal">
                         <li>Abra o WhatsApp no seu celular</li>
                         <li>Acesse Configurações/Aparelhos Conectados</li>
@@ -385,20 +510,39 @@ export default function BotPage() {
             <div className="space-y-6">
               <Card className="border-0 shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-xl">Recursos Disponíveis</CardTitle>
+                  <CardTitle className="text-xl">
+                    Recursos Disponíveis
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {[
-                    { icon: MessageSquare, title: "Respostas Automáticas", desc: "Atendimento 24/7 com respostas instantâneas" },
-                    { icon: Users, title: "Multiusuários", desc: "Atenda vários clientes simultaneamente" },
-                    { icon: BarChart2, title: "Análise de Conversas", desc: "Métricas e insights das interações" }
+                    {
+                      icon: MessageSquare,
+                      title: "Respostas Automáticas",
+                      desc: "Atendimento 24/7 com respostas instantâneas",
+                    },
+                    {
+                      icon: Users,
+                      title: "Multiusuários",
+                      desc: "Atenda vários clientes simultaneamente",
+                    },
+                    {
+                      icon: BarChart2,
+                      title: "Análise de Conversas",
+                      desc: "Métricas e insights das interações",
+                    },
                   ].map((item, i) => (
-                    <div key={i} className="flex items-start gap-4 p-4 rounded-lg bg-gray-50">
+                    <div
+                      key={i}
+                      className="flex items-start gap-4 p-4 rounded-lg bg-gray-50"
+                    >
                       <div className="p-2 rounded-full bg-green-100">
                         <item.icon className="w-5 h-5 text-green-600" />
                       </div>
                       <div>
-                        <h3 className="font-medium text-gray-800">{item.title}</h3>
+                        <h3 className="font-medium text-gray-800">
+                          {item.title}
+                        </h3>
                         <p className="text-sm text-gray-600">{item.desc}</p>
                       </div>
                     </div>
@@ -408,9 +552,12 @@ export default function BotPage() {
 
               <Card className="border-0 shadow-lg bg-gradient-to-br from-green-500 to-emerald-600 text-white">
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-medium mb-2">Precisa de ajuda?</h3>
+                  <h3 className="text-lg font-medium mb-2">
+                    Precisa de ajuda?
+                  </h3>
                   <p className="text-green-50 mb-4">
-                    Nossa equipe está disponível para auxiliar na configuração do seu bot.
+                    Nossa equipe está disponível para auxiliar na configuração
+                    do seu bot.
                   </p>
                   <Button variant="secondary" className="w-full">
                     Contatar Suporte
@@ -432,8 +579,14 @@ export default function BotPage() {
                     <Phone className="w-5 h-5 text-green-600" />
                     <span className="text-gray-600">{bot.phoneNumber}</span>
                   </div>
-                  <Badge className={bot.isOnline ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                    {bot.isOnline ? 'Online' : 'Offline'}
+                  <Badge
+                    className={
+                      bot.isOnline
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-800"
+                    }
+                  >
+                    {bot.isOnline ? "Online" : "Offline"}
                   </Badge>
                 </div>
 
@@ -447,24 +600,33 @@ export default function BotPage() {
 
                 <div className="flex items-center gap-3 text-gray-600">
                   <Clock className="w-5 h-5 text-green-600" />
-                  <span>Última conexão: {new Date(bot.lastConnection!).toLocaleString()}</span>
+                  <span>
+                    Última conexão:{" "}
+                    {new Date(bot.lastConnection!).toLocaleString()}
+                  </span>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-0 shadow-lg">
               <CardHeader>
-                <CardTitle className="text-lg">Métricas de Atendimento</CardTitle>
+                <CardTitle className="text-lg">
+                  Métricas de Atendimento
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <p className="text-sm text-gray-600">Mensagens</p>
-                    <p className="text-2xl font-bold text-gray-800">{bot.messageCount}</p>
+                    <p className="text-2xl font-bold text-gray-800">
+                      {bot.messageCount}
+                    </p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <p className="text-sm text-gray-600">Chats Ativos</p>
-                    <p className="text-2xl font-bold text-gray-800">{bot.activeChats}</p>
+                    <p className="text-2xl font-bold text-gray-800">
+                      {bot.activeChats}
+                    </p>
                   </div>
                 </div>
 
@@ -477,8 +639,12 @@ export default function BotPage() {
                 </div>
 
                 <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600">Tempo Médio de Resposta</p>
-                  <p className="text-2xl font-bold text-gray-800">{bot.averageResponseTime}s</p>
+                  <p className="text-sm text-gray-600">
+                    Tempo Médio de Resposta
+                  </p>
+                  <p className="text-2xl font-bold text-gray-800">
+                    {bot.averageResponseTime}s
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -488,15 +654,24 @@ export default function BotPage() {
                 <CardTitle className="text-lg">Ações Rápidas</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start gap-2">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-2"
+                >
                   <MessageSquare className="w-4 h-4" />
                   Gerenciar Respostas
                 </Button>
-                <Button variant="outline" className="w-full justify-start gap-2">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-2"
+                >
                   <Users className="w-4 h-4" />
                   Grupos Ativos
                 </Button>
-                <Button variant="outline" className="w-full justify-start gap-2">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-2"
+                >
                   <BarChart2 className="w-4 h-4" />
                   Ver Relatórios
                 </Button>
@@ -506,5 +681,5 @@ export default function BotPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

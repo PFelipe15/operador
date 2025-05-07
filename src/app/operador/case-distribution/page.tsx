@@ -82,7 +82,7 @@ const CaseDistributionPage: FC = () => {
       setLoading(true)
       setError(null)
       
-      const response = await fetch('/api/operators')
+      const response = await fetch('/api/v1/operators')
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }

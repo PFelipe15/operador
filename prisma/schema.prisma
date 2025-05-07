@@ -64,11 +64,11 @@ enum TimelineEventType {
 }
 
 enum TimelineEventCategory {
-  STATUS   @map("STATUS")
-  DOCUMENT @map("DOCUMENT")
-  DATA     @map("DATA")
-  ANALYSIS @map("ANALYSIS")
-  UPDATEFIELD  @map("UPDATEFIELD")
+  STATUS      @map("STATUS")
+  DOCUMENT    @map("DOCUMENT")
+  DATA        @map("DATA")
+  ANALYSIS    @map("ANALYSIS")
+  UPDATEFIELD @map("UPDATEFIELD")
 }
 
 enum NotificationType {
@@ -119,7 +119,7 @@ enum PendingDataType {
   DOC_COMPROVANTE_ENDERECO   @map("DOC_COMPROVANTE_ENDERECO")
   DOC_COMPROVANTE_EMPRESA    @map("DOC_COMPROVANTE_EMPRESA")
   DOC_COMPROVANTE_RENDA      @map("DOC_COMPROVANTE_RENDA")
-  DOC_CPF                   @map("DOC_CPF")
+  DOC_CPF                    @map("DOC_CPF")
   COMPANY_NAME               @map("COMPANY_NAME")
   COMPANY_PRINCIPAL_ACTIVITY @map("COMPANY_PRINCIPAL_ACTIVITY")
 }
@@ -200,6 +200,7 @@ model Process {
   isActive          Boolean           @default(true)
   lastInteractionAt DateTime          @default(now())
   notifications     Notification[]
+  Message           Message[]
 }
 
 model Document {
@@ -268,6 +269,7 @@ model Operator {
   uploadedDocuments     Document[]      @relation("UploadedDocuments")
   verifiedDocuments     Document[]      @relation("VerifiedDocuments")
   rejectedDocuments     Document[]      @relation("RejectedDocuments")
+  Message               Message[]
 }
 
 model SystemConfig {
@@ -362,4 +364,33 @@ model BotWhatsapp {
   @@map("bot_whatsapp")
 }
 
- 
+model Message {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Dados da mensagem
+  content     String
+  messageType String    @default("text") // text, image, video, etc
+  fromMe      Boolean   @default(false)
+  read        Boolean   @default(false)
+  readAt      DateTime?
+
+  // Metadados do WhatsApp
+  whatsappMessageId String? // ID original da mensagem do WhatsApp
+  remoteJid         String // Número do remetente/destinatário
+  timestamp         DateTime // Timestamp original do WhatsApp
+
+  // Dados do processo/cliente relacionado
+  processId String?
+  process   Process? @relation(fields: [processId], references: [id])
+
+  // Operador relacionado (se for mensagem de atendimento)
+  operatorId String?
+  operator   Operator? @relation(fields: [operatorId], references: [id])
+
+  @@index([remoteJid])
+  @@index([createdAt])
+  @@index([processId])
+  @@index([whatsappMessageId])
+}

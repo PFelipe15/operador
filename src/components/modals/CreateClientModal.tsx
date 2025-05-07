@@ -50,7 +50,7 @@ export function CreateClientModal({ isOpen, onClose, onSuccess }: CreateClientMo
     setLoading(true)
 
     try {
-      const response = await fetch('/api/clients', {
+      const response = await fetch('/api/v1/clients', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

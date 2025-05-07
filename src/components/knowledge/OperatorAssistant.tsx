@@ -39,7 +39,7 @@ export function OperatorAssistant() {
 
     try {
       // Aqui você implementaria a chamada para sua API
-      const response = await fetch('/api/assistant', {
+      const response = await fetch('/api/v1/assistant', {
         method: 'POST',
         body: JSON.stringify({
           message: content,

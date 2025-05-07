@@ -14,6 +14,7 @@ import {
   ChevronRightIcon,
   FileText,
   LayoutDashboard,
+  MessageCircle,
   Settings,
   Share2,
   Users
@@ -53,6 +54,12 @@ const sidebarLinks = [
     name: 'Relatórios',
     href: '/operador/relatorios',
     icon: <BarChart3 className="text-emerald-600 h-5 dark:text-emerald-400" />
+  },
+  {
+    id: 'chats',
+    name: 'Chats',
+    href: '/operador/chats',
+    icon: <MessageCircle className="text-emerald-600 h-5 dark:text-emerald-400" />
   },
   {
     id: 'configuracoes',

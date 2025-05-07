@@ -56,7 +56,7 @@ const ClientsPage: FC = () => {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response = await fetch('/api/clients')
+        const response = await fetch('/api/v1/clients')
         const data = await response.json()
         setClients(data)
       } catch (error) {

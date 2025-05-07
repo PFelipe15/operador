@@ -108,7 +108,7 @@ export function CreateProcessModal({ isOpen, onClose, onSuccess, operatorId }: C
   const [showAddress, setShowAddress] = useState(false);
 
   const getClients = async () => {
-    const response = await fetch('http://localhost:3000/api/clients')
+    const response = await fetch('http://localhost:3000/api/v1/clients')
     const data = await response.json()
     setExistingClients(data)
   }
@@ -209,7 +209,7 @@ export function CreateProcessModal({ isOpen, onClose, onSuccess, operatorId }: C
       };
 
 
-      const response = await fetch('/api/processes', {
+      const response = await fetch('/api/v1/processes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

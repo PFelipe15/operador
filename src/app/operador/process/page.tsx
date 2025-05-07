@@ -41,6 +41,7 @@ import {
 import { ProcessStatus } from "@prisma/client";
 import {
   ArrowRightLeft,
+  Files,
   Filter,
   LayoutGrid,
   LayoutList,
@@ -48,11 +49,10 @@ import {
   Plus,
   Search,
   UserCheck,
-  UserPlus
+  UserPlus,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FC, useEffect, useState } from "react";
- 
 
 interface Address {
   street: string;
@@ -119,8 +119,6 @@ interface ProcessStats {
   };
 }
 
-
-
 const ProcessPage: FC = () => {
   const { operator } = useAuth();
   const isAdmin = operator?.role === "ADMIN";
@@ -148,12 +146,11 @@ const ProcessPage: FC = () => {
       const fetchProcesses = async () => {
         try {
           const url = isAdmin
-            ? "/api/processes"
-            : `/api/processes/operator/${operatorId}`;
+            ? "/api/v1/processes"
+            : `/api/v1/processes/operator/${operatorId}`;
 
           const response = await fetch(url);
           const data = await response.json();
-          console.log(data)
           setProcesses(data);
         } catch (error) {
           console.error("Erro ao carregar processos:", error);
@@ -169,7 +166,7 @@ const ProcessPage: FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch("/api/processes/stats");
+        const response = await fetch("/api/v1/processes/stats");
         const data = await response.json();
         setProcessStats(data);
       } catch (error) {
@@ -326,8 +323,23 @@ const ProcessPage: FC = () => {
               ) : (
                 <AssignToMeButton
                   processId={process.id}
-                  onAssign={() => {
-                    window.location.reload();
+                  onAssignSuccess={() => {
+                    // Recarrega os processos
+                    const fetchProcesses = async () => {
+                      try {
+                        const url = isAdmin
+                          ? "/api/v1/processes"
+                          : `/api/v1/processes/operator/${operatorId}`;
+
+                        const response = await fetch(url);
+                        const data = await response.json();
+                        setProcesses(data);
+                      } catch (error) {
+                        console.error("Erro ao carregar processos:", error);
+                      }
+                    };
+
+                    fetchProcesses();
                   }}
                 />
               )}
@@ -338,17 +350,16 @@ const ProcessPage: FC = () => {
     );
   };
 
- 
-
   return (
     <div className="space-y-6  ">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          
           <div className="flex items-center gap-2 ">
-          <h2 className="text-3xl font-bold tracking-tight">Processos</h2>
-          <TooltipComponent text="Essa pagina mostrará os processos em andamentos que estão sem responsvavel 
-           ou que estão atribuidos a você!"/>  
+            <h2 className="text-3xl font-bold tracking-tight">Processos</h2>
+            <TooltipComponent
+              text="Essa pagina mostrará os processos em andamentos que estão sem responsvavel 
+           ou que estão atribuidos a você!"
+            />
           </div>
           <p className="text-muted-foreground">
             Gerencie todos os processos em andamento
@@ -366,10 +377,19 @@ const ProcessPage: FC = () => {
       <div>
         {!loading ? (
           <>
-           {/* {isAdmin && <StatsSection />} */}
+            {/* {isAdmin && <StatsSection />} */}
             {processes.length === 0 ? (
-              <div className="flex items-center justify-center">
-                <h1>Nenhum processo encontrado</h1>
+              <div className="flex flex-col items-center justify-center p-12 text-center">
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-full p-4 mb-4">
+                  <Files className="w-8 h-8 text-gray-400" />
+                </div>
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  Nenhum processo encontrado
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 max-w-sm">
+                  Não existem processos atribuídos a você ou pendentes de
+                  atribuição no momento.
+                </p>
               </div>
             ) : (
               <>
@@ -566,9 +586,26 @@ const ProcessPage: FC = () => {
                                   ) : (
                                     <AssignToMeButton
                                       processId={process.id}
-                                      onAssign={() => {
-                                        // Recarrega os dados após atribuição
-                                        window.location.reload();
+                                      onAssignSuccess={() => {
+                                        // Recarrega os processos
+                                        const fetchProcesses = async () => {
+                                          try {
+                                            const url = isAdmin
+                                              ? "/api/v1/processes"
+                                              : `/api/v1/processes/operator/${operatorId}`;
+
+                                            const response = await fetch(url);
+                                            const data = await response.json();
+                                            setProcesses(data);
+                                          } catch (error) {
+                                            console.error(
+                                              "Erro ao carregar processos:",
+                                              error
+                                            );
+                                          }
+                                        };
+
+                                        fetchProcesses();
                                       }}
                                     />
                                   )}

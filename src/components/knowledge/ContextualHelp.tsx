@@ -33,7 +33,7 @@ export function ContextualHelp() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/assistant', {
+      const response = await fetch('/api/v1/assistant', {
         method: 'POST',
         body: JSON.stringify({
           message: content,

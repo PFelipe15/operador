@@ -1,5 +1,6 @@
- import { Card } from "./card"
+import { Card } from "./card"
 import { ReactNode } from "react"
+import { cn } from "@/lib/utils"
 
 interface MetricCardProps {
   title: string
@@ -7,6 +8,9 @@ interface MetricCardProps {
   icon: ReactNode
   color?: "blue" | "green" | "red" | "yellow" | "emerald" | "purple" | "indigo" | "pink" | "orange"
   description?: string
+  trend?: number
+  trendLabel?: string
+  className?: string
 }
 
 const colorVariants = {
@@ -57,11 +61,20 @@ const colorVariants = {
   }
 }
 
-export function MetricCard({ title, value, icon, color = "blue", description }: MetricCardProps) {
+export function MetricCard({
+  title,
+  value,
+  icon,
+  color = "blue",
+  description,
+  trend,
+  trendLabel,
+  className
+}: MetricCardProps) {
   const colors = colorVariants[color] || colorVariants.blue;
   
   return (
-    <Card className="border shadow-sm hover:shadow-md transition-all dark:bg-gray-900 ">
+    <Card className={cn("border shadow-sm hover:shadow-md transition-all dark:bg-gray-900", className)}>
       <div className="p-6">
         <div className="flex items-center gap-4">
           <div className={`p-3 rounded-lg ${colors.bg} ${colors.text}`}>
@@ -79,6 +92,19 @@ export function MetricCard({ title, value, icon, color = "blue", description }: 
             )}
           </div>
         </div>
+        {trend !== undefined && (
+          <div className="flex items-center gap-2 mt-3">
+            <span className={cn(
+              "text-sm font-medium",
+              trend > 0 ? "text-green-600" : "text-red-600"
+            )}>
+              {trend > 0 ? "+" : ""}{trend}%
+            </span>
+            <span className="text-sm text-gray-500">
+              {trendLabel}
+            </span>
+          </div>
+        )}
       </div>
     </Card>
   )

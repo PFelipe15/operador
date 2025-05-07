@@ -28,7 +28,7 @@ export function AddOperatorModal({ onOperatorAdded }: AddOperatorModalProps) {
     setLoading(true)
 
     try {
-      const response = await fetch("/api/operators", {
+      const response = await fetch("/api/v1/operators", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
