@@ -11,6 +11,12 @@ enum ProcessStatus {
   // Status Inicial
   CREATED @map("CREATED") // Processo Criado
 
+  // Status de Pagamento
+  AWAITING_PAYMENT  @map("AWAITING_PAYMENT") // Aguardando Pagamento
+  PAYMENT_PENDING   @map("PAYMENT_PENDING") // Pagamento Pendente
+  PAYMENT_CONFIRMED @map("PAYMENT_CONFIRMED") // Pagamento Confirmado
+  PAYMENT_FAILED    @map("PAYMENT_FAILED") // Pagamento Falhou
+
   // Status de Dados Pendentes
   PENDING_DATA    @map("PENDING_DATA") // Pendente de Dados Pessoais
   PENDING_COMPANY @map("PENDING_COMPANY") // Pendente de Dados da Empresa
@@ -124,6 +130,37 @@ enum PendingDataType {
   COMPANY_PRINCIPAL_ACTIVITY @map("COMPANY_PRINCIPAL_ACTIVITY")
 }
 
+enum NotePriority {
+  HIGH   @map("HIGH")
+  MEDIUM @map("MEDIUM")
+  LOW    @map("LOW")
+}
+
+enum NoteType {
+  PRIVATE  @map("PRIVATE")
+  INTERNAL @map("INTERNAL")
+  PUBLIC   @map("PUBLIC")
+}
+
+enum TaskPriority {
+  HIGH   @map("HIGH")
+  MEDIUM @map("MEDIUM")
+  LOW    @map("LOW")
+}
+
+enum TaskStatus {
+  PENDING   @map("PENDING")
+  COMPLETED @map("COMPLETED")
+  CANCELLED @map("CANCELLED")
+}
+
+enum ReminderType {
+  DEADLINE @map("DEADLINE")
+  FOLLOWUP @map("FOLLOWUP")
+  MEETING  @map("MEETING")
+  DOCUMENT @map("DOCUMENT")
+}
+
 model Client {
   id               String    @id @default(cuid())
   createdAt        DateTime  @default(now())
@@ -201,6 +238,22 @@ model Process {
   lastInteractionAt DateTime          @default(now())
   notifications     Notification[]
   Message           Message[]
+
+  // Campos de Pagamento
+  paymentRequired    Boolean   @default(true) // Se requer pagamento
+  paymentAmount      Float? // Valor do pagamento
+  paymentMethod      String? // PIX, CARD, etc
+  paymentId          String? // ID do pagamento no gateway
+  paymentPixKey      String? // Chave PIX gerada
+  paymentQrCode      String? // QR Code do PIX
+  paymentDueDate     DateTime? // Prazo para pagamento
+  paymentConfirmedAt DateTime? // Data da confirmação
+  paymentReference   String? // Referência do pagamento
+
+  // Novas relações para funcionalidades dinâmicas
+  notes     Note[]
+  tasks     Task[]
+  reminders Reminder[]
 }
 
 model Document {
@@ -270,6 +323,12 @@ model Operator {
   verifiedDocuments     Document[]      @relation("VerifiedDocuments")
   rejectedDocuments     Document[]      @relation("RejectedDocuments")
   Message               Message[]
+
+  // Novas relações para funcionalidades dinâmicas
+  createdNotes     Note[]     @relation("CreatedNotes")
+  createdTasks     Task[]     @relation("CreatedTasks")
+  assignedTasks    Task[]     @relation("AssignedTasks")
+  createdReminders Reminder[] @relation("CreatedReminders")
 }
 
 model SystemConfig {
@@ -393,4 +452,82 @@ model Message {
   @@index([createdAt])
   @@index([processId])
   @@index([whatsappMessageId])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  content  String
+  type     NoteType     @default(PRIVATE)
+  priority NotePriority @default(MEDIUM)
+  tags     String[]     @default([])
+  pinned   Boolean      @default(false)
+
+  // Relacionamentos
+  processId String
+  process   Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+
+  createdBy String
+  operator  Operator @relation("CreatedNotes", fields: [createdBy], references: [id])
+
+  @@index([processId])
+  @@index([createdBy])
+  @@index([createdAt])
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title       String
+  description String?
+  status      TaskStatus   @default(PENDING)
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+  completedAt DateTime?
+
+  // Relacionamentos
+  processId String
+  process   Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+
+  createdBy String
+  creator   Operator @relation("CreatedTasks", fields: [createdBy], references: [id])
+
+  assignedTo String?
+  assignee   Operator? @relation("AssignedTasks", fields: [assignedTo], references: [id])
+
+  @@index([processId])
+  @@index([createdBy])
+  @@index([assignedTo])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model Reminder {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title       String
+  description String?
+  type        ReminderType @default(DEADLINE)
+  dueDate     DateTime
+  completed   Boolean      @default(false)
+  notified    Boolean      @default(false)
+  notifiedAt  DateTime?
+
+  // Relacionamentos
+  processId String
+  process   Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+
+  createdBy String
+  operator  Operator @relation("CreatedReminders", fields: [createdBy], references: [id])
+
+  @@index([processId])
+  @@index([createdBy])
+  @@index([dueDate])
+  @@index([completed])
 }

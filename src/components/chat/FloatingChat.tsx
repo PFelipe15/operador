@@ -7,15 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import {
-  AlertCircle,
-  Bot,
-  Clock,
-  MessageSquare,
-  Send,
-  Shield,
-  X,
-} from "lucide-react";
+import { Bot, Clock, MessageSquare, Send, Shield, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { toast } from "sonner";
@@ -50,7 +42,7 @@ export function FloatingChat() {
   const { operator } = useAuth();
 
   useEffect(() => {
-    const socketInstance = io("ws://localhost:3001");
+    const socketInstance = io("ws://localhost:3002");
     setSocket(socketInstance);
 
     // Atualizado para usar a nova estrutura de dados

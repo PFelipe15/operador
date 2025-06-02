@@ -1,7 +1,6 @@
-import { PendingDataType, ProcessStatus } from "@prisma/client"
-import { Building2, CheckCircle2, FileText, User2 } from "lucide-react"
-import { Icon } from "next/dist/lib/metadata/types/metadata-types"
-
+import { PendingDataType, ProcessStatus } from "@prisma/client";
+import { Building2, CheckCircle2, FileText, User2 } from "lucide-react";
+import { Icon } from "next/dist/lib/metadata/types/metadata-types";
 
 export const MEI_ANALYSIS_STEPS = {
   DADOS_PESSOAIS: {
@@ -17,35 +16,38 @@ export const MEI_ANALYSIS_STEPS = {
         id: "nome_completo",
         label: "Nome completo está correto e sem abreviações",
         required: true,
-        pendingTypeData: [ PendingDataType.DATA_NOME_COMPLETO]
+        pendingTypeData: [PendingDataType.DATA_NOME_COMPLETO],
       },
       {
         id: "cpf_valido",
         label: "CPF válido e consistente com documentação",
         required: true,
-        pendingTypeData: [PendingDataType.DATA_CPF]
+        pendingTypeData: [PendingDataType.DATA_CPF],
       },
       {
         id: "rg_valido",
         label: "RG válido e dentro da validade",
         required: true,
-        pendingTypeData: [PendingDataType.DATA_RG]
+        pendingTypeData: [PendingDataType.DATA_RG],
       },
       {
         id: "endereco_completo",
         label: "Endereço completo e com comprovante",
         required: true,
-        pendingTypeData: [PendingDataType.DATA_ENDERECO]
+        pendingTypeData: [PendingDataType.DATA_ENDERECO],
       },
       {
         id: "contatos_validos",
         label: "Telefone e email válidos e testados",
         required: true,
-        pendingTypeData: [PendingDataType.DATA_TELEFONE, PendingDataType.DATA_EMAIL]
-      }
-    ]
+        pendingTypeData: [
+          PendingDataType.DATA_TELEFONE,
+          PendingDataType.DATA_EMAIL,
+        ],
+      },
+    ],
   },
-  
+
   ATIVIDADE_MEI: {
     id: "ATIVIDADE_MEI",
     title: "Análise de Atividade MEI",
@@ -58,21 +60,22 @@ export const MEI_ANALYSIS_STEPS = {
       {
         id: "cnae_permitido",
         label: "CNAE está na lista de permitidos para MEI",
-        required: true
+        required: true,
+        pendingTypeData: [PendingDataType.COMPANY_PRINCIPAL_ACTIVITY],
       },
       {
         id: "atividade_principal",
         label: "Atividade principal claramente definida",
         required: true,
-        pendingTypeData: [PendingDataType.COMPANY_PRINCIPAL_ACTIVITY]
+        pendingTypeData: [PendingDataType.COMPANY_PRINCIPAL_ACTIVITY],
       },
       {
         id: "nome_fantasia",
         label: "Nome fantasia válido e registrado",
         required: true,
-        pendingTypeData: [PendingDataType.COMPANY_NAME]
-      }
-    ]
+        pendingTypeData: [PendingDataType.COMPANY_NAME],
+      },
+    ],
   },
 
   DOCUMENTACAO: {
@@ -88,21 +91,27 @@ export const MEI_ANALYSIS_STEPS = {
         id: "docs_pessoais_rg",
         label: "Documentos pessoais completos e legíveis",
         required: true,
-        pendingTypeData: [PendingDataType.DOC_IDENTIDADE, PendingDataType.DOC_RESIDENCIA, PendingDataType.DOC_COMPROVANTE_ENDERECO, PendingDataType.DOC_COMPROVANTE_EMPRESA, PendingDataType.DOC_COMPROVANTE_RENDA]
+        pendingTypeData: [
+          PendingDataType.DOC_IDENTIDADE,
+          PendingDataType.DOC_RESIDENCIA,
+          PendingDataType.DOC_COMPROVANTE_ENDERECO,
+          PendingDataType.DOC_COMPROVANTE_EMPRESA,
+          PendingDataType.DOC_COMPROVANTE_RENDA,
+        ],
       },
       {
         id: "docs_pessoais_cpf",
         label: "CPF válido e consistente com documentação",
         required: true,
-        pendingTypeData: [PendingDataType.DOC_CPF]
+        pendingTypeData: [PendingDataType.DOC_CPF],
       },
-     
+
       {
         id: "certidoes_negativas",
         label: "Certidões negativas verificadas",
-        required: false
-      }
-    ]
+        required: false,
+      },
+    ],
   },
 
   VALIDACAO_CADASTRAL: {
@@ -117,24 +126,28 @@ export const MEI_ANALYSIS_STEPS = {
       {
         id: "consulta_cpf",
         label: "Situação CPF regular na Receita Federal",
-        required: true
+        required: true,
+        pendingTypeData: [PendingDataType.DATA_CPF],
       },
       {
         id: "consulta_nome",
         label: "Sem homônimos ou processos em nome",
-        required: true
+        required: true,
+        pendingTypeData: [PendingDataType.DATA_NOME_COMPLETO],
       },
       {
         id: "consulta_endereco",
         label: "Endereço permite atividade comercial",
-        required: true
+        required: true,
+        pendingTypeData: [PendingDataType.DATA_ENDERECO],
       },
       {
         id: "restricoes_municipais",
         label: "Sem restrições municipais para atividade",
-        required: true
-      }
-    ]
+        required: true,
+        pendingTypeData: [PendingDataType.COMPANY_PRINCIPAL_ACTIVITY],
+      },
+    ],
   },
 
   APROVACAO_FINAL: {
@@ -149,44 +162,55 @@ export const MEI_ANALYSIS_STEPS = {
       {
         id: "revisao_documentos",
         label: "Todos documentos revisados e aprovados",
-        required: true
+        required: true,
+        pendingTypeData: [
+          PendingDataType.DOC_IDENTIDADE,
+          PendingDataType.DOC_CPF,
+        ],
       },
       {
         id: "revisao_informacoes",
         label: "Informações cadastrais conferidas",
-        required: true
+        required: true,
+        pendingTypeData: [
+          PendingDataType.DATA_NOME_COMPLETO,
+          PendingDataType.DATA_CPF,
+          PendingDataType.DATA_ENDERECO,
+        ],
       },
       {
         id: "termo_ciencia",
         label: "Cliente ciente das obrigações do MEI",
-        required: true
+        required: true,
+        pendingTypeData: [PendingDataType.COMPANY_PRINCIPAL_ACTIVITY],
       },
       {
         id: "aprovacao_responsavel",
         label: "Aprovado pelo responsável técnico",
-        required: true
-      }
-    ]
-  }
-}
+        required: true,
+        pendingTypeData: [PendingDataType.DATA_NOME_COMPLETO],
+      },
+    ],
+  },
+};
 
 // Tipo para os itens de verificação
 export interface CheckItem {
-  id: string
-  label: string
-  required: boolean
-  checked?: boolean
-  pendingTypeData?: PendingDataType[]
+  id: string;
+  label: string;
+  required: boolean;
+  checked?: boolean;
+  pendingTypeData?: PendingDataType[];
 }
 
 // Tipo para os steps de análise
 export interface AnalysisStep {
-  id: string
-  title: string
-  description: string
-  status: ProcessStatus
-  next_status: ProcessStatus
-  progress: number
-  icon: Icon
-  checkItems: CheckItem[]
-} 
+  id: string;
+  title: string;
+  description: string;
+  status: ProcessStatus;
+  next_status: ProcessStatus;
+  progress: number;
+  icon: Icon;
+  checkItems: CheckItem[];
+}

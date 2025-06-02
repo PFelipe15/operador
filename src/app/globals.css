@@ -79,6 +79,47 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Melhor renderização de texto e SVG */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* Estilos para melhorar a nitidez de SVGs e logos */
+@layer components {
+  .logo-container,
+  svg {
+    image-rendering: crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    shape-rendering: geometricPrecision;
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Específico para elementos de texto dentro de SVGs */
+  svg text {
+    text-rendering: geometricPrecision;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-feature-settings: "kern" 1, "liga" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Melhora a nitidez em elementos com gradientes */
+  [fill*="url(#"],
+  [stroke*="url(#"] {
+    image-rendering: auto;
+    shape-rendering: geometricPrecision;
+  }
+  
+  /* Otimização para ícones e elementos pequenos */
+  .icon-crisp {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
   }
 }
 

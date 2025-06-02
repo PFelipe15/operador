@@ -1,15 +1,19 @@
-import React from 'react'
+import React from "react";
 
 interface LogoProps {
-  width?: number
-  height?: number
-  variant?: 'default' | 'white'
+  width?: number;
+  height?: number;
+  variant?: "default" | "white";
 }
 
-const Logo: React.FC<LogoProps> = ({ width = 130, height = 40, variant = 'default' }) => {
-  const textColor = variant === 'white' ? '#FFFFFF' : 'currentColor'
-  const accentColor = '#059669'
-   
+const Logo: React.FC<LogoProps> = ({
+  width = 130,
+  height = 40,
+  variant = "default",
+}) => {
+  const textColor = variant === "white" ? "#FFFFFF" : "currentColor";
+  const accentColor = "#059669";
+
   return (
     <svg
       width={width}
@@ -18,18 +22,29 @@ const Logo: React.FC<LogoProps> = ({ width = 130, height = 40, variant = 'defaul
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       preserveAspectRatio="xMidYMid meet"
+      style={{
+        imageRendering: "crisp-edges",
+        shapeRendering: "geometricPrecision",
+        textRendering: "geometricPrecision",
+      }}
     >
       <defs>
-        <linearGradient id="documentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient
+          id="documentGradient"
+          x1="0%"
+          y1="0%"
+          x2="100%"
+          y2="100%"
+        >
           <stop offset="0%" stopColor="#059669" />
           <stop offset="100%" stopColor="#10B981" />
         </linearGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
-          <feMerge>
-            <feMergeNode in="coloredBlur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
+        <filter id="sharpenFilter" x="-50%" y="-50%" width="200%" height="200%">
+          <feConvolveMatrix order="3" kernelMatrix="0 -1 0 -1 5 -1 0 -1 0" />
+        </filter>
+        <filter id="crisp">
+          <feFlood floodColor="#000000" floodOpacity="0" />
+          <feComposite in="SourceGraphic" />
         </filter>
       </defs>
 
@@ -39,7 +54,9 @@ const Logo: React.FC<LogoProps> = ({ width = 130, height = 40, variant = 'defaul
         <path
           d="M4 2C4 1.44772 4.44772 1 5 1H19C19.5523 1 20 1.44772 20 2V30C20 30.5523 19.5523 31 19 31H5C4.44772 31 4 30.5523 4 30V2Z"
           fill="url(#documentGradient)"
-          filter="url(#glow)"
+          filter="url(#crisp)"
+          strokeWidth="0.5"
+          stroke="rgba(5, 150, 105, 0.2)"
         />
 
         {/* Linhas do Documento */}
@@ -48,6 +65,7 @@ const Logo: React.FC<LogoProps> = ({ width = 130, height = 40, variant = 'defaul
           stroke="white"
           strokeWidth="1.5"
           strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
         />
 
         {/* Círculo de Progresso */}
@@ -56,49 +74,74 @@ const Logo: React.FC<LogoProps> = ({ width = 130, height = 40, variant = 'defaul
           cy="20"
           r="4"
           fill="#10B981"
-          opacity="0.9"
+          opacity="1"
+          strokeWidth="0.5"
+          stroke="rgba(255, 255, 255, 0.3)"
         />
 
         {/* Checkmark */}
         <path
           d="M14 20L15.5 21.5L18 19"
           stroke="white"
-          strokeWidth="1.5"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+          fill="none"
         />
       </g>
 
-      {/* Texto */}
-      <g>
+      {/* Texto Principal */}
+      <g
+        style={{
+          fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
+        }}
+      >
         <text
           x="32"
           y="22"
-          fontFamily="Arial, sans-serif"
           fontSize="18"
-          fontWeight="bold"
+          fontWeight="800"
           fill={textColor}
-          letterSpacing="-0.5"
+          letterSpacing="-0.8px"
+          style={{
+            fontFamily:
+              'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+            textRendering: "geometricPrecision",
+            dominantBaseline: "central",
+          }}
         >
           STEP.
-
-          <tspan fill={accentColor} letterSpacing="-0.5">MEI</tspan>
+          <tspan
+            fill={accentColor}
+            letterSpacing="-0.8px"
+            style={{ fontWeight: "800" }}
+          >
+            MEI
+          </tspan>
         </text>
-        
+
+        {/* Tagline */}
         <text
           x="32"
           y="35"
-          fontFamily="Arial, sans-serif"
           fontSize="10"
+          fontWeight="500"
           fill={textColor}
-          opacity="0.7"
-          letterSpacing="0.5"
+          opacity="0.75"
+          letterSpacing="0.3px"
+          style={{
+            fontFamily:
+              'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+            textRendering: "geometricPrecision",
+            dominantBaseline: "central",
+          }}
         >
           Abertura Inteligente
         </text>
       </g>
     </svg>
-  )
-}
+  );
+};
 
-export default Logo
+export default Logo;

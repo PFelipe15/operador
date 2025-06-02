@@ -172,7 +172,7 @@ export async function GET(
         operatorPerformance,
         documentMetrics,
         clientMetrics,
-        documentsByType
+        documentsByType,
       ] = await Promise.all([
         // Contagem total de operadores ativos
         prisma.operator.count({
@@ -235,17 +235,17 @@ export async function GET(
           by: ["source"],
           _count: true,
         }),
-        
+
         // Nova consulta: Documentos agrupados por tipo
         prisma.document.groupBy({
           by: ["type"],
           _count: {
-            _all: true
+            _all: true,
           },
           where: {
-            process: { ...baseWhere }
-          }
-        })
+            process: { ...baseWhere },
+          },
+        }),
       ]);
 
       // Calcular taxa de sucesso para cada operador
@@ -293,48 +293,61 @@ export async function GET(
       const verifiedDocumentsByType = await prisma.document.groupBy({
         by: ["type"],
         _count: {
-          _all: true
+          _all: true,
         },
         where: {
           process: { ...baseWhere },
-          status: "VERIFIED"
-        }
+          status: "VERIFIED",
+        },
       });
 
       // Criar mapa para facilitar o acesso aos dados de documentos verificados
       const verifiedDocsMap = new Map();
-      verifiedDocumentsByType.forEach(doc => {
+      verifiedDocumentsByType.forEach((doc) => {
         verifiedDocsMap.set(doc.type, doc._count._all);
       });
 
       // Preparar dados para o gráfico de verificação por tipo
       const documentVerificationByTypeData = {
-        labels: documentsByType.map(doc => {
+        labels: documentsByType.map((doc) => {
           // Traduzir os tipos de documento para exibição
-          switch(doc.type) {
-            case "ID": return "Identidade";
-            case "CPF": return "CPF";
-            case "ADDRESS_PROOF": return "Comprovante de Endereço";
-            case "INCOME_PROOF": return "Comprovante de Renda";
-            case "SELFIE": return "Selfie";
-            case "CNPJ": return "CNPJ";
-            case "COMPANY_CONTRACT": return "Contrato Social";
-            case "OTHER": return "Outros";
-            default: return doc.type;
+          switch (doc.type) {
+            case "ID":
+              return "Identidade";
+            case "CPF":
+              return "CPF";
+            case "ADDRESS_PROOF":
+              return "Comprovante de Endereço";
+            case "INCOME_PROOF":
+              return "Comprovante de Renda";
+            case "SELFIE":
+              return "Selfie";
+            case "CNPJ":
+              return "CNPJ";
+            case "COMPANY_CONTRACT":
+              return "Contrato Social";
+            case "OTHER":
+              return "Outros";
+            default:
+              return doc.type;
           }
         }),
-        datasets: [{
-          label: "Taxa de Verificação (%)",
-          data: documentsByType.map(doc => {
-            const totalDocs = doc._count._all;
-            const verifiedDocs = verifiedDocsMap.get(doc.type) || 0;
-            // Calcular a porcentagem de documentos verificados
-            return totalDocs > 0 ? Math.round((verifiedDocs / totalDocs) * 100) : 0;
-          }),
-          backgroundColor: "#3B82F6",
-          borderColor: "#2563EB",
-          borderWidth: 1
-        }]
+        datasets: [
+          {
+            label: "Taxa de Verificação (%)",
+            data: documentsByType.map((doc) => {
+              const totalDocs = doc._count._all;
+              const verifiedDocs = verifiedDocsMap.get(doc.type) || 0;
+              // Calcular a porcentagem de documentos verificados
+              return totalDocs > 0
+                ? Math.round((verifiedDocs / totalDocs) * 100)
+                : 0;
+            }),
+            backgroundColor: "#3B82F6",
+            borderColor: "#2563EB",
+            borderWidth: 1,
+          },
+        ],
       };
 
       // Adicionar métricas administrativas ao retorno
@@ -433,6 +446,124 @@ export async function GET(
     }
 
     console.log("staleProcesses", staleProcesses);
+
+    // Para operadores não-admin, vamos buscar dados mais específicos
+    const [
+      recentActivities,
+      urgentProcessesList,
+      recentDocuments,
+      recentClients,
+    ] = await Promise.all([
+      // Atividades recentes do operador
+      prisma.process.findMany({
+        where: {
+          ...baseWhere,
+          updatedAt: {
+            gte: new Date(new Date().setHours(new Date().getHours() - 24)), // Últimas 24 horas
+          },
+        },
+        select: {
+          id: true,
+          status: true,
+          updatedAt: true,
+          client: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          updatedAt: "desc",
+        },
+        take: 10,
+      }),
+
+      // Lista de processos urgentes com detalhes
+      prisma.process.findMany({
+        where: {
+          ...baseWhere,
+          priority: "HIGH",
+          isActive: true,
+        },
+        select: {
+          id: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
+          client: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+        take: 5,
+      }),
+
+      // Documentos recentes
+      prisma.document.findMany({
+        where: {
+          process: { ...baseWhere },
+          createdAt: {
+            gte: new Date(new Date().setHours(new Date().getHours() - 48)), // Últimas 48 horas
+          },
+        },
+        select: {
+          id: true,
+          type: true,
+          status: true,
+          createdAt: true,
+          process: {
+            select: {
+              client: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 5,
+      }),
+
+      // Últimos clientes (baseado nos processos do operador)
+      prisma.client.findMany({
+        where: {
+          processes: {
+            some: {
+              ...baseWhere,
+            },
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          source: true,
+          createdAt: true,
+          _count: {
+            select: {
+              processes: {
+                where: {
+                  ...baseWhere,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 8,
+      }),
+    ]);
+
     return NextResponse.json({
       totalProcesses,
       activeProcesses,
@@ -454,6 +585,85 @@ export async function GET(
       performanceRate: totalProcesses
         ? Math.round((completedProcesses / totalProcesses) * 100)
         : 0,
+
+      // Novos dados para dashboard dinâmico
+      recentActivities: recentActivities.map((activity) => ({
+        id: activity.id,
+        type: "process_update",
+        status: activity.status,
+        statusLabel: translateProcessStatus(activity.status),
+        clientName: activity.client?.name,
+        timestamp: activity.updatedAt,
+        timeAgo: Math.floor(
+          (new Date().getTime() - new Date(activity.updatedAt).getTime()) /
+            (1000 * 60)
+        ), // minutos atrás
+      })),
+
+      urgentProcessesList: urgentProcessesList.map((process) => ({
+        id: process.id,
+        clientName: process.client?.name,
+        status: process.status,
+        statusLabel: translateProcessStatus(process.status),
+        createdAt: process.createdAt,
+        daysWaiting: Math.floor(
+          (new Date().getTime() - new Date(process.createdAt).getTime()) /
+            (1000 * 60 * 60 * 24)
+        ),
+      })),
+
+      recentDocuments: recentDocuments.map((doc) => ({
+        id: doc.id,
+        type: doc.type,
+        status: doc.status,
+        statusLabel: translateDocumentStatus(doc.status),
+        clientName: doc.process?.client?.name,
+        timestamp: doc.createdAt,
+        hoursAgo: Math.floor(
+          (new Date().getTime() - new Date(doc.createdAt).getTime()) /
+            (1000 * 60 * 60)
+        ),
+      })),
+
+      // Estatísticas de hoje
+      todayStats: {
+        processesCreated: await prisma.process.count({
+          where: {
+            ...baseWhere,
+            createdAt: {
+              gte: new Date(new Date().setHours(0, 0, 0, 0)),
+            },
+          },
+        }),
+        processesCompleted: await prisma.process.count({
+          where: {
+            ...baseWhere,
+            status: "APPROVED",
+            updatedAt: {
+              gte: new Date(new Date().setHours(0, 0, 0, 0)),
+            },
+          },
+        }),
+        documentsReceived: await prisma.document.count({
+          where: {
+            process: { ...baseWhere },
+            createdAt: {
+              gte: new Date(new Date().setHours(0, 0, 0, 0)),
+            },
+          },
+        }),
+      },
+
+      // Novos dados para operadores não-admin
+      recentClients: recentClients.map((client) => ({
+        id: client.id,
+        name: client.name,
+        email: client.email,
+        phone: client.phone,
+        source: client.source,
+        processes: client._count.processes,
+        joinedAt: client.createdAt,
+      })),
     });
   } catch (error) {
     console.error("Erro ao buscar estatísticas:", error);

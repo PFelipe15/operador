@@ -24,7 +24,7 @@ import { Progress } from "@/components/ui/progress";
 import { ProcessStatus } from "@prisma/client";
 import { toast } from "sonner";
 
-const socket = io("http://localhost:3001");
+const socket = io("http://localhost:3002");
 
 interface Mensagem {
   id: string;

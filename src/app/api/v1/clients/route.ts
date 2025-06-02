@@ -1,22 +1,76 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const clients = await prisma.client.findMany({
-      include: {
-        _count: {
-          select: {
-            processes: true,
+    const { searchParams } = new URL(request.url);
+    const operatorId = searchParams.get("operatorId");
+    const role = searchParams.get("role");
+
+    let clients;
+
+    if (role === "ADMIN") {
+      // Admin vê todos os clientes
+      clients = await prisma.client.findMany({
+        include: {
+          _count: {
+            select: {
+              processes: true,
+            },
+          },
+          processes: {
+            include: {
+              operator: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+          address: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    } else {
+      // Operador vê apenas clientes dos processos atribuídos a ele
+      clients = await prisma.client.findMany({
+        where: {
+          processes: {
+            some: {
+              operatorId: operatorId,
+            },
           },
         },
-        processes: true,
-        address: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+        include: {
+          _count: {
+            select: {
+              processes: true,
+            },
+          },
+          processes: {
+            where: {
+              operatorId: operatorId,
+            },
+            include: {
+              operator: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+          address: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    }
+
     return NextResponse.json(clients);
   } catch (error) {
     console.error("Erro ao buscar clientes:", error);
