@@ -251,9 +251,10 @@ model Process {
   paymentReference   String? // Referência do pagamento
 
   // Novas relações para funcionalidades dinâmicas
-  notes     Note[]
-  tasks     Task[]
-  reminders Reminder[]
+  notes         Note[]
+  tasks         Task[]
+  reminders     Reminder[]
+  AIInteraction AIInteraction[]
 }
 
 model Document {
@@ -268,6 +269,9 @@ model Document {
   process   Process        @relation(fields: [processId], references: [id])
   processId String
   verified  Boolean        @default(false)
+  fileSize  Int?
+  mimeType  String?
+  metadata  String?
 
   // Relações de upload quero que apareca na tipagem
   uploadedBy   Operator? @relation("UploadedDocuments", fields: [uploadedById], references: [id])
@@ -530,4 +534,37 @@ model Reminder {
   @@index([createdBy])
   @@index([dueDate])
   @@index([completed])
+}
+
+model AIInteraction {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Dados da interação
+  clientPhone       String
+  messageText       String
+  intentDetected    String?
+  aiResponse        String
+  conversationState String
+  responseTime      Int // em milissegundos
+  success           Boolean @default(true)
+
+  // Relacionamentos opcionais
+  processId String?
+  process   Process? @relation(fields: [processId], references: [id])
+
+  // Metadados para análise
+  confidence   Float? // Confiança da detecção de intenção
+  tokensUsed   Int? // Tokens consumidos da API
+  model        String? // Modelo usado (ex: gpt-4o-mini)
+  errorMessage String? // Se houve erro
+  fallbackUsed Boolean @default(false) // Se usou resposta de fallback
+
+  @@index([clientPhone])
+  @@index([createdAt])
+  @@index([intentDetected])
+  @@index([conversationState])
+  @@index([processId])
+  @@index([success])
 }

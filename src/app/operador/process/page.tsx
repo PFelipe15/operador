@@ -423,7 +423,9 @@ const ProcessPage: FC = () => {
     const isReadyToWork =
       !process.paymentRequired || process.status === "PAYMENT_CONFIRMED";
     const needsPayment =
-      process.paymentRequired && process.status !== "PAYMENT_CONFIRMED";
+      process.paymentRequired &&
+      (process.status === "PAYMENT_PENDING" ||
+        process.status === "AWAITING_PAYMENT");
 
     const getPriorityStyles = (priority: string) => {
       switch (priority) {
@@ -1276,7 +1278,7 @@ const ProcessPage: FC = () => {
                                 getProcessStatusColor(process.status)
                               )}
                             >
-                              {translateProcessStatus(process.status)}
+                              {translateProcessStatus(process.status)}  
                             </Badge>
                           </TableCell>
                           <TableCell>

@@ -52,6 +52,7 @@ export async function PATCH(
     if (step === "PENDING_DATA_UPDATE") {
       const currentProcess = await prisma.process.findUnique({
         where: { id: processId },
+        include: { client: true },
       });
 
       if (!currentProcess) {
@@ -102,6 +103,49 @@ export async function PATCH(
           }),
         },
       });
+
+      // NOVO: Notificar cliente via bot se há itens pendentes adicionados
+      if (
+        data.addedItems &&
+        data.addedItems.length > 0 &&
+        currentProcess.client
+      ) {
+        try {
+          const notificationResponse = await fetch(
+            `${
+              process.env.BOT_WEBHOOK_URL || "http://localhost:3002"
+            }/webhook/operator-notification`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                processId: processId,
+                type: "PENDING_ITEMS_ADDED",
+                clientPhone: currentProcess.client.phone,
+                additionalInfo: {
+                  pendingItems: data.addedItems,
+                  operatorId: currentProcess.operatorId,
+                  operatorAction: "marked_pending",
+                  totalPending: data.pendingTypeData.length,
+                },
+              }),
+            }
+          );
+
+          if (notificationResponse.ok) {
+            console.log("✅ Cliente notificado sobre pendências via bot");
+          } else {
+            console.error(
+              "❌ Erro ao notificar cliente via bot:",
+              await notificationResponse.text()
+            );
+          }
+        } catch (error) {
+          console.error("❌ Erro ao enviar notificação para o bot:", error);
+        }
+      }
 
       return NextResponse.json(updatedProcess);
     }

@@ -73,6 +73,7 @@ import {
   CheckSquare,
   ClipboardCheck,
   Clock,
+  CreditCard,
   Download,
   ExternalLink,
   Eye,
@@ -2077,36 +2078,235 @@ export default function ProcessDetails() {
 
             {/* Tab: Análise - Focada apenas na análise */}
             <TabsContent value="analysis" className="space-y-4">
-              {process.status === "CREATED" ? (
+              {/* Status relacionados a pagamento */}
+              {process.status === "AWAITING_PAYMENT" ||
+              process.status === "PAYMENT_PENDING" ||
+              process.status === "PAYMENT_FAILED" ? (
+                <Card className="shadow-lg border-0 bg-gradient-to-br from-orange-50 via-orange-50 to-orange-100 overflow-hidden">
+                  <CardContent className="p-8 text-center relative">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-orange-200/20 rounded-full -translate-y-12 translate-x-12"></div>
+                    <div className="absolute bottom-0 left-0 w-20 h-20 bg-orange-200/20 rounded-full translate-y-10 -translate-x-10"></div>
+
+                    <div className="relative z-10 space-y-6">
+                      {/* Imagem de Pagamento */}
+                      <div className="flex justify-center mb-6">
+                        <div className="w-32 h-32 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full flex items-center justify-center">
+                          <img
+                            src="/credit_payment.svg"
+                            alt="Pagamento"
+                            className="w-20 h-20"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <h2 className="text-2xl font-bold text-orange-800 mb-2">
+                          {process.status === "AWAITING_PAYMENT"
+                            ? "Aguardando Pagamento"
+                            : process.status === "PAYMENT_PENDING"
+                            ? "Pagamento Pendente"
+                            : "Pagamento Rejeitado"}
+                        </h2>
+                        <p className="text-orange-700 text-lg">
+                          {process.status === "AWAITING_PAYMENT"
+                            ? "O cliente ainda precisa escolher o método de pagamento para dar início ao processo de abertura do MEI."
+                            : process.status === "PAYMENT_PENDING"
+                            ? "O cliente escolheu o método de pagamento mas ainda não confirmou. Você pode entrar em contato para auxiliá-lo."
+                            : "O pagamento foi rejeitado. O cliente pode tentar novamente com outro método de pagamento."}
+                        </p>
+                      </div>
+
+                      <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-orange-200">
+                        <h3 className="text-lg font-semibold text-orange-900 mb-3">
+                          📋 Informações do Processo de Pagamento
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="font-medium text-orange-800">
+                              Cliente:
+                            </span>
+                            <br />
+                            <span className="text-orange-700">
+                              {process.client.name}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-orange-800">
+                              Telefone:
+                            </span>
+                            <br />
+                            <span className="text-orange-700">
+                              {formatPhone(process.client.phone)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-orange-800">
+                              Email:
+                            </span>
+                            <br />
+                            <span className="text-orange-700">
+                              {process.client.email}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-orange-800">
+                              Processo:
+                            </span>
+                            <br />
+                            <span className="text-orange-700">
+                              #{process.id.slice(-8)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <Button
+                          onClick={handleWhatsApp}
+                          className="bg-green-600 hover:bg-green-700 text-white gap-2"
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                          Contactar Cliente
+                        </Button>
+                        <Button
+                          onClick={handleSendEmail}
+                          variant="outline"
+                          className="border-orange-300 text-orange-700 hover:bg-orange-50 gap-2"
+                        >
+                          <Mail className="h-4 w-4" />
+                          Enviar Email
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : process.status === "PAYMENT_CONFIRMED" ? (
                 <Card className="shadow-lg border-0 bg-gradient-to-br from-emerald-50 via-green-50 to-emerald-100 overflow-hidden">
-                  <CardContent className="p-6 text-center relative">
+                  <CardContent className="p-8 text-center relative">
                     {/* Decorative background elements */}
                     <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-200/20 rounded-full -translate-y-12 translate-x-12"></div>
                     <div className="absolute bottom-0 left-0 w-20 h-20 bg-green-200/20 rounded-full translate-y-10 -translate-x-10"></div>
 
-                    <div className="relative z-10 space-y-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
-                        <Zap className="h-8 w-8 text-white" />
+                    <div className="relative z-10 space-y-6">
+                      {/* Imagem de Pagamento Confirmado */}
+                      <div className="flex justify-center mb-6">
+                        <div className="w-32 h-32 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-full flex items-center justify-center">
+                          <img
+                            src="/cemporcentodigital.svg"
+                            alt="Pagamento Confirmado"
+                            className="w-20 h-20"
+                          />
+                        </div>
                       </div>
+
                       <div>
-                        <h2 className="text-xl font-bold text-emerald-800 mb-1">
-                          Iniciar Análise do Processo
+                        <h2 className="text-2xl font-bold text-emerald-800 mb-2">
+                          💚 Pagamento Confirmado!
                         </h2>
-                        <p className="text-emerald-600">
-                          Clique para começar a análise do processo de{" "}
+                        <p className="text-emerald-700 text-lg">
+                          Excelente! O pagamento de{" "}
                           <span className="font-semibold">
                             {process.client.name}
-                          </span>
+                          </span>{" "}
+                          foi confirmado com sucesso.
+                        </p>
+                        <p className="text-emerald-600 mt-2">
+                          Agora você pode iniciar o processo de análise e
+                          abertura do MEI.
                         </p>
                       </div>
-                      <Button
-                        onClick={handleStartProcess}
-                        size="lg"
-                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg px-6 py-3 font-semibold"
-                      >
-                        <Zap className="h-5 w-5 mr-2" />
-                        Iniciar Processo
-                      </Button>
+
+                      {/* Informações do Pagamento */}
+                      <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-emerald-200">
+                        <h3 className="text-lg font-semibold text-emerald-900 mb-3">
+                          ✅ Detalhes do Pagamento
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="font-medium text-emerald-800">
+                              Cliente:
+                            </span>
+                            <br />
+                            <span className="text-emerald-700">
+                              {process.client.name}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-emerald-800">
+                              Status:
+                            </span>
+                            <br />
+                            <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">
+                              Pagamento Confirmado
+                            </Badge>
+                          </div>
+                          {process.paymentConfirmedAt && (
+                            <div>
+                              <span className="font-medium text-emerald-800">
+                                Confirmado em:
+                              </span>
+                              <br />
+                              <span className="text-emerald-700">
+                                {formatDate(
+                                  process.paymentConfirmedAt.toString()
+                                )}
+                              </span>
+                            </div>
+                          )}
+                          <div>
+                            <span className="font-medium text-emerald-800">
+                              Processo:
+                            </span>
+                            <br />
+                            <span className="text-emerald-700">
+                              #{process.id.slice(-8)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Botão para Iniciar Processo */}
+                      <div className="bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg p-1">
+                        <div className="bg-white rounded-lg p-4">
+                          <h3 className="text-lg font-semibold text-emerald-900 mb-2">
+                            🚀 Pronto para Iniciar
+                          </h3>
+                          <p className="text-emerald-700 mb-4">
+                            Com o pagamento confirmado, você pode dar início ao
+                            processo de análise e abertura do MEI.
+                          </p>
+                          <Button
+                            onClick={handleStartProcess}
+                            size="lg"
+                            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg px-8 py-3 font-semibold w-full sm:w-auto"
+                          >
+                            <Zap className="h-5 w-5 mr-2" />
+                            Iniciar Análise do Processo
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : process.status === "CREATED" ? (
+                <Card className="shadow-lg border-0 bg-gradient-to-br from-blue-50 via-blue-50 to-blue-100 overflow-hidden">
+                  <CardContent className="p-6 text-center relative">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-200/20 rounded-full -translate-y-12 translate-x-12"></div>
+                    <div className="absolute bottom-0 left-0 w-20 h-20 bg-blue-200/20 rounded-full translate-y-10 -translate-x-10"></div>
+
+                    <div className="relative z-10 space-y-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                        <Clock className="h-8 w-8 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-bold text-blue-800 mb-1">
+                          Processo Aguardando Pagamento
+                        </h2>
+                        <p className="text-blue-600">
+                          O cliente precisa finalizar o pagamento antes que a
+                          análise possa ser iniciada.
+                        </p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

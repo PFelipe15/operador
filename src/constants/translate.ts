@@ -14,6 +14,10 @@ export const processStatusTranslations: Record<string, string> = {
   CANCELLED: "Cancelado",
   ON_HOLD: "Em Espera",
   CREATED: "Iniciado",
+  AWAITING_PAYMENT: "Aguardando Pagamento",
+  PAYMENT_PENDING: "Pagamento Pendente",
+  PAYMENT_CONFIRMED: "Pagamento Confirmado",
+  PAYMENT_FAILED: "Pagamento Falhou",
 };
 
 // Cores para status do processo
@@ -37,13 +41,20 @@ export const processStatusColors: Record<string, string> = {
     "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300",
   ANALYZING_DOCS:
     "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300",
-
   APPROVED:
     "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300",
   COMPLETED:
     "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300",
   CANCELLED: "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300",
   ON_HOLD: "bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300",
+  AWAITING_PAYMENT:
+    "bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300",
+  PAYMENT_PENDING:
+    "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300",
+  PAYMENT_CONFIRMED:
+    "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300",
+  PAYMENT_FAILED:
+    "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300",
 };
 
 export const infoDataUpdate = {

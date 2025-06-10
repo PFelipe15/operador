@@ -19,6 +19,7 @@ import {
   Settings,
   Share2,
   Users,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -66,6 +67,13 @@ const sidebarLinks = [
     href: "/operador/chats",
     icon: <MessageCircle className="h-5 w-5" />,
     gradient: "from-emerald-500 to-green-600",
+  },
+  {
+    id: "guia-status",
+    name: "Guia de Status",
+    href: "/operador/guia-status",
+    icon: <BookOpen className="h-5 w-5" />,
+    gradient: "from-purple-500 to-indigo-600",
   },
   {
     id: "configuracoes",

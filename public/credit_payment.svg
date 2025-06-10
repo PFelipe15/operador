@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" fill="none">
+  <!-- Background Circle -->
+  <circle cx="150" cy="150" r="140" fill="#FEF3E2" stroke="#FB923C" stroke-width="4"/>
+  
+  <!-- Credit Card -->
+  <rect x="80" y="110" width="140" height="90" rx="12" fill="#FFFFFF" stroke="#FB923C" stroke-width="3"/>
+  
+  <!-- Card Stripe -->
+  <rect x="80" y="130" width="140" height="15" fill="#FB923C"/>
+  
+  <!-- Card Numbers -->
+  <rect x="95" y="150" width="15" height="3" rx="1.5" fill="#D97706"/>
+  <rect x="115" y="150" width="15" height="3" rx="1.5" fill="#D97706"/>
+  <rect x="135" y="150" width="15" height="3" rx="1.5" fill="#D97706"/>
+  <rect x="155" y="150" width="15" height="3" rx="1.5" fill="#D97706"/>
+  
+  <!-- Chip -->
+  <rect x="95" y="165" width="20" height="15" rx="3" fill="#F59E0B"/>
+  
+  <!-- Card Logo -->
+  <circle cx="190" cy="175" r="8" fill="#FB923C" opacity="0.3"/>
+  <circle cx="200" cy="175" r="8" fill="#FB923C" opacity="0.3"/>
+  
+  <!-- Money Symbol -->
+  <circle cx="150" cy="80" r="25" fill="#10B981" stroke="#FFFFFF" stroke-width="3"/>
+  <text x="150" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#FFFFFF">$</text>
+  
+  <!-- Payment Arrow -->
+  <path d="M60 220 L90 200 L90 210 L240 210 L240 230 L90 230 L90 240 L60 220 Z" fill="#FB923C"/>
+  
+  <!-- Decorative Elements -->
+  <circle cx="50" cy="80" r="3" fill="#FB923C" opacity="0.4"/>
+  <circle cx="250" cy="80" r="3" fill="#FB923C" opacity="0.4"/>
+  <circle cx="50" cy="220" r="3" fill="#FB923C" opacity="0.4"/>
+  <circle cx="250" cy="220" r="3" fill="#FB923C" opacity="0.4"/>
+</svg> 
